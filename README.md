@@ -30,7 +30,7 @@ git clone https://github.com/yourusername/MagnoGrabr.git
 cd MagnoGrabr
 npm install
 npm run build
-
+```
 Then:
 
 1. Open chrome://extensions (or your browser’s equivalent).
