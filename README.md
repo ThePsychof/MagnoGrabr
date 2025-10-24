@@ -93,6 +93,3 @@ const links = await browserAPI.storage.get("links");
 ---
 
 💡 Future updates are comming!
-You want me to sprinkle in a **“Build Troubleshooting / Tips for Contributors”** section too (for next-level dev polish)?  
-Like explaining hot reload, manifest quirks, and Chrome weirdness?
-
