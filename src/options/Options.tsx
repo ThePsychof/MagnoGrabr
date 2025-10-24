@@ -96,7 +96,7 @@ export default function Options() {
             href="https://github.com/ThePsychof/MagnoGrabr" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-zinc-400 hover:text-zinc-300 text-sm underline"
+            className="text-zinc-400 hover:text-zinc-300 underline"
           >
             View Source on GitHub
           </a>
