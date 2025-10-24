@@ -1,0 +1,34 @@
+2025-10-20T16:56:28.492Z eslint:cli CLI args: [ 'src', '--debug', '--format', 'json' ]
+2025-10-20T16:56:28.493Z eslint:cli Using flat config? true
+2025-10-20T16:56:28.497Z eslint:cli Running on files
+2025-10-20T16:56:28.498Z eslint:eslint Using config loader LegacyConfigLoader
+2025-10-20T16:56:28.499Z eslint:eslint Using file patterns: src
+2025-10-20T16:56:28.499Z eslint:eslint Deleting cache file at D:\Programming\HoverHound\MagnoGrabr\.eslintcache
+2025-10-20T16:56:28.513Z eslint:config-loader Calculating config for file D:\Programming\HoverHound\MagnoGrabr\src\background.ts
+2025-10-20T16:56:28.513Z eslint:config-loader Searching for eslint.config.js
+2025-10-20T16:56:28.514Z eslint:config-loader [Legacy]: Calculating config for D:\Programming\HoverHound\MagnoGrabr\src\background.ts
+2025-10-20T16:56:28.516Z eslint:config-loader [Legacy]: Using config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js and base path D:\Programming\HoverHound\MagnoGrabr
+2025-10-20T16:56:28.517Z eslint:config-loader Calculating config array from config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js and base path D:\Programming\HoverHound\MagnoGrabr
+2025-10-20T16:56:28.517Z eslint:config-loader Loading config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js
+2025-10-20T16:56:28.518Z eslint:config-loader Loading config from D:\Programming\HoverHound\MagnoGrabr\eslint.config.js
+2025-10-20T16:56:28.518Z eslint:config-loader Config file URL is file:///D:/Programming/HoverHound/MagnoGrabr/eslint.config.js
+
+Oops! Something went wrong! :(
+
+ESLint: 9.38.0
+
+TypeError: Plugin "" not found.
+    at findPluginConfig (D:\Programming\HoverHound\MagnoGrabr\node_modules\@eslint\config-helpers\dist\cjs\index.cjs:259:9)
+    at D:\Programming\HoverHound\MagnoGrabr\node_modules\@eslint\config-helpers\dist\cjs\index.cjs:430:25
+    at Array.map (<anonymous>)
+    at processExtends (D:\Programming\HoverHound\MagnoGrabr\node_modules\@eslint\config-helpers\dist\cjs\index.cjs:428:36)
+    at D:\Programming\HoverHound\MagnoGrabr\node_modules\@eslint\config-helpers\dist\cjs\index.cjs:504:38
+    at Array.flatMap (<anonymous>)
+    at processConfigList (D:\Programming\HoverHound\MagnoGrabr\node_modules\@eslint\config-helpers\dist\cjs\index.cjs:504:20)
+    at defineConfig (D:\Programming\HoverHound\MagnoGrabr\node_modules\@eslint\config-helpers\dist\cjs\index.cjs:540:9)
+    at file:///D:/Programming/HoverHound/MagnoGrabr/eslint.config.js?mtime=1760979312671:3:16
+    at ModuleJob.run (node:internal/modules/esm/module_job:329:25)
+(node:14104) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/Programming/HoverHound/MagnoGrabr/eslint.config.js?mtime=1760979312671 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\Programming\HoverHound\MagnoGrabr\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

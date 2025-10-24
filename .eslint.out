@@ -1,0 +1,33 @@
+2025-10-20T17:12:30.741Z eslint:cli CLI args: [ 'src',      '--ext', '.ts,.tsx', '--debug', '--fix',    '--format', 'unix' ]
+2025-10-20T17:12:30.742Z eslint:cli Using flat config? true
+2025-10-20T17:12:30.746Z eslint:cli Running on files
+2025-10-20T17:12:30.747Z eslint:eslint Using config loader LegacyConfigLoader
+2025-10-20T17:12:30.748Z eslint:eslint Using file patterns: src
+2025-10-20T17:12:30.748Z eslint:eslint Deleting cache file at D:\Programming\HoverHound\MagnoGrabr\.eslintcache
+2025-10-20T17:12:30.763Z eslint:config-loader Calculating config for file D:\Programming\HoverHound\MagnoGrabr\src\background.ts
+2025-10-20T17:12:30.763Z eslint:config-loader Searching for eslint.config.js
+2025-10-20T17:12:30.764Z eslint:config-loader [Legacy]: Calculating config for D:\Programming\HoverHound\MagnoGrabr\src\background.ts
+2025-10-20T17:12:30.764Z eslint:config-loader [Legacy]: Using config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js and base path D:\Programming\HoverHound\MagnoGrabr
+2025-10-20T17:12:30.764Z eslint:config-loader Calculating config array from config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js and base path D:\Programming\HoverHound\MagnoGrabr
+2025-10-20T17:12:30.765Z eslint:config-loader Loading config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js
+2025-10-20T17:12:30.765Z eslint:config-loader Loading config from D:\Programming\HoverHound\MagnoGrabr\eslint.config.js
+2025-10-20T17:12:30.765Z eslint:config-loader Config file URL is file:///D:/Programming/HoverHound/MagnoGrabr/eslint.config.js
+2025-10-20T17:12:30.771Z eslint:config-loader Config file D:\Programming\HoverHound\MagnoGrabr\eslint.config.js is not empty
+
+Oops! Something went wrong! :(
+
+ESLint: 9.38.0
+
+A config object is using the "parser" key, which is not supported in flat config system.
+
+Flat config uses "languageOptions.parser" to override the default parser.
+
+Please see the following page for information on how to convert your config object into the correct format:
+https://eslint.org/docs/latest/use/configure/migration-guide#custom-parsers
+
+If you're not using "parser" directly (it may be coming from a plugin), please see the following:
+https://eslint.org/docs/latest/use/configure/migration-guide#using-eslintrc-configs-in-flat-config
+(node:11016) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/Programming/HoverHound/MagnoGrabr/eslint.config.js?mtime=1760980220918 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to D:\Programming\HoverHound\MagnoGrabr\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

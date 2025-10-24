@@ -1,0 +1,18 @@
+/* stylelint-disable at-rule-no-unknown */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+/* stylelint-enable at-rule-no-unknown */
+:root {
+    --psychof-red: #ff002b
+}
+/* quick custom */
+body { 
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background: #000;
+    color: #fff;
+}
+.cursor-MagnoGrabr {
+    cursor: url("PLACEHOLDER") 16 16, crosshair !important;
+}
