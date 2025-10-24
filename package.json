@@ -10,7 +10,8 @@
     "build:ui": "vite build",
     "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/popup.css --minify && tailwindcss -i ./src/styles/tailwind.css -o ./dist/options.css --minify",
     "build:ts": "tsc --noEmit",
-    "build": "rimraf dist && mkdir dist && npm run build:ts && npm run build:background && npm run build:content && npm run build:ui && npm run build:css && node scripts/prepare-dist.js && node scripts/fix-html-css.js",
+    "build": "rimraf dist && mkdir dist && npm run build:ts && npm run build:background && npm run build:content && npm run build:ui && npm run build:css && node scripts/prepare-dist.js && node scripts/fix-html-css.js && node scripts/check-dist.js",
+    "validate": "node scripts/check-dist.js",
     "preview": "vite preview",
     "clean": "rimraf dist dist-ts node_modules/.vite"
   },

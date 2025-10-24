@@ -105,48 +105,6 @@ try {
     }
   }
 
-  // 4️⃣ Verify required files exist
-  const required = [
-    "manifest.json",
-    "popup.html",
-    "options.html",
-    "background.js",
-    "content.js",
-    "popup.js",
-    "options.js",
-    "popup.css",
-    "options.css",
-    "icons/MagnoGrabr16.png",
-    "icons/MagnoGrabr32.png",
-    "icons/MagnoGrabr48.png",
-    "icons/MagnoGrabr128.png",
-    "cursor.png"
-  ];
-
-  let allGood = true;
-  for (const f of required) {
-    if (!exists(f)) {
-      log.err(`Missing required dist file: ${f}`);
-      allGood = false;
-    }
-  }
-
-  if (allGood) log.ok("All required files are present!");
-  else log.err("Some required files are missing.");
-
-  // 5️⃣ Show debug summary
-  console.log("\n📁 Dist structure debug:");
-  function walk(dir, depth = 0) {
-    const prefix = " ".repeat(depth * 2);
-    for (const item of fs.readdirSync(dir)) {
-      const fullPath = path.join(dir, item);
-      const stats = fs.statSync(fullPath);
-      console.log(prefix + (stats.isDirectory() ? "📂 " : "📄 ") + item);
-      if (stats.isDirectory()) walk(fullPath, depth + 1);
-    }
-  }
-  walk(dist);
-
   console.log("\n✨ prepare-dist completed successfully!\n");
 } catch (err) {
   log.err("prepare-dist crashed: " + err.message);
