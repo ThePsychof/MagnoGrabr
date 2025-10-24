@@ -89,6 +89,18 @@ export default function Options() {
             Reset
           </button>
         </div>
+
+        {/* GitHub Source Link */}
+        <div className="mt-6 text-center text-xs">
+          <a 
+            href="https://github.com/ThePsychof/MagnoGrabr" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-zinc-400 hover:text-zinc-300 text-sm underline"
+          >
+            View Source on GitHub
+          </a>
+        </div>
       </div>
     </div>
   );

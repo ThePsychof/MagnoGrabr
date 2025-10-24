@@ -94,6 +94,17 @@ try {
     log.warn("public/cursor.png missing");
   }
 
+  // 3.6️⃣ Remove unwanted browser-api.css file
+  const browserApiCss = path.join(dist, "assets", "browser-api.css");
+  if (fs.existsSync(browserApiCss)) {
+    try {
+      fs.unlinkSync(browserApiCss);
+      console.log("🗑️  Removed unwanted browser-api.css");
+    } catch (err) {
+      log.warn(`Failed to remove browser-api.css: ${err.message}`);
+    }
+  }
+
   // 4️⃣ Verify required files exist
   const required = [
     "manifest.json",
