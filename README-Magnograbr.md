@@ -9,11 +9,6 @@ What's new (Oct 22, 2025):
 How to test locally (dev build):
 1. Build and load the extension in the browser via your normal dev workflow (Vite-based builds included in project).
 2. Open the popup and Options pages to interact with new controls.
-3. Run simple helper tests:
-
-   ```
-   npm run test:unit
-   ```
 
 Notes and limitations:
 - Native download manager detection is a placeholder: real detection requires a native messaging host or installer-side helper. The UI and background endpoint are prepared to be wired to a native host later.
@@ -23,4 +18,3 @@ Notes and limitations:
 Next improvements you may want:
 - Wire ignore list behavior to a preview UI that shows which links were ignored during a scan.
 - Add a native messaging host for robust detection and integration with local download managers.
-- Add unit tests to a proper test framework (Jest / Vitest) for broader coverage.
