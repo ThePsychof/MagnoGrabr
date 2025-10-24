@@ -46,13 +46,6 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Testing
-test-results/
-playwright-report/
-playwright/.cache/
-coverage/
-*.lcov
-
 # Logs
 logs/
 *.log
