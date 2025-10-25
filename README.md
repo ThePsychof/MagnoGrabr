@@ -21,9 +21,26 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 
 ---
 
-## 🚀 Installation
+
+### 🤠 For Users
+
+
+1. Download the built-version folder in repository
+
+2. Go to your browser and open extension menu
+
+3. Activate the dev mode
+
+4. uplouad unpacked
+
+5. choose the built-version from your pc
+
+6. done!
+
+
 
 ### 🧑‍💻 For Devs
+
 
 ```bash
 git clone https://github.com/yourusername/MagnoGrabr.git
@@ -77,19 +94,22 @@ Everything lives locally in your browser — you own your data, not some random 
 
 ---
 
-🧰 browserAPI Wrapper
+🧰 browser-api Wrapper
 
 A compatibility layer that abstracts differences between browser APIs.
+  
 This ensures smooth behavior across Chromium-based and Firefox browsers.
+
 
 Example:
 
 import { browserAPI } from "./utils/browser-api";
 
 await browserAPI.storage.set("links", grabbedLinks);
+  
 const links = await browserAPI.storage.get("links");
 
 
 ---
 
-💡 Future updates are comming!
+  💡 Future updates are comming!
