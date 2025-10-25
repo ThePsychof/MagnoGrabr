@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { GrabbedLink } from "../utils/helpers";
 import { browserAPI, type ExtensionSettings } from "../utils/browser-api";
 import { KeyCapture, getKeyDisplayName, isValidKey } from "../utils/key-capture";
+import { Github } from "lucide-react";
 
 declare const browser: any;
 declare const chrome: any;
@@ -308,6 +309,18 @@ export default function Popup() {
           >
             Reset
           </button>
+        </div>
+        {/* GitHub Source Link */}
+        <div className="mt-1 flex items-center justify-center gap-1 text-center text-sm text-zinc-300">
+          <Github className="w-4 h-4"/>
+          <a 
+            href="https://github.com/ThePsychof/MagnoGrabr" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 hover:text-zinc-200 transition-colors"
+          >
+            <span>Source</span>
+          </a>
         </div>
       </div>
     </>

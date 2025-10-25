@@ -19,13 +19,10 @@ const exists = (p) => fs.existsSync(path.join(dist, p));
 const required = [
   "manifest.json",
   "popup.html",
-  "options.html",
   "background.js",
   "content.js",
   "popup.js",
-  "options.js",
   "popup.css",
-  "options.css",
   "style.css",
   "cursor.png",
   "icons/MagnoGrabr16.png",
