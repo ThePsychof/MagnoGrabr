@@ -30,7 +30,6 @@
     "vite-plugin-web-extension": "^4.4.5"
   },
   "dependencies": {
-    "lucide-react": "^0.548.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

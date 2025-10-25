@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
             rollupOptions: {
               input: {
                 popup: path.resolve(__dirname, "src/popup/index.html"),
+                options: path.resolve(__dirname, "src/options/index.html"),
               },
               output: {
                 entryFileNames: "[name].js",
@@ -59,6 +60,7 @@ export default defineConfig(({ mode }) => {
                 assetFileNames: (assetInfo) => {
                   if (assetInfo.name?.endsWith(".css")) {
                     if (assetInfo.name.includes("popup")) return "popup.css";
+                    if (assetInfo.name.includes("options")) return "options.css";
                     // For any other CSS files, put them in assets
                     return "assets/[name][extname]";
                   }

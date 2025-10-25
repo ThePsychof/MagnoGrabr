@@ -46,6 +46,10 @@
       ]
     }
   ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
 
   "offline_enabled": true,
   "minimum_chrome_version": "88"

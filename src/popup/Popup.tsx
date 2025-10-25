@@ -310,15 +310,14 @@ export default function Popup() {
             Reset
           </button>
         </div>
-        {/* GitHub Source Link */}
-        <div className="mt-1 flex items-center justify-center gap-1 text-center text-sm text-zinc-300">
-          <Github className="w-4 h-4"/>
-          <a 
-            href="https://github.com/ThePsychof/MagnoGrabr" 
-            target="_blank" 
+        <div className="mt-1 flex justify-center items-center">
+          <a
+            href="https://github.com/ThePsychof/MagnoGrabr"
+            target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 hover:text-zinc-200 transition-colors"
+            className="flex items-center gap-1 text-zinc-400 hover:text-red-600 decoration-zinc-400 decoration-2 transition-all"
           >
+            <Github className="w-4 h-4" />
             <span>Source</span>
           </a>
         </div>
