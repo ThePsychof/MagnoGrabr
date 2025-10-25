@@ -16,7 +16,7 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 - 🧲 **Hover to Grab** – Just hover your mouse over links. That’s it. MagnoGrabr does the rest.  
 - ⚙️ **Customizable Hotkeys** – Choose your own activation/deactivation keys. No more fighting your muscle memory.  
 - 🧠 **Smart Storage** – Uses local browser storage, no servers, no spying, no cookies, no nonsense.  
-- 🪄 **Dedupe** – Removes duplicate links like.
+- 🪄 **Dedupe** – Removes duplicate links.
 - 🧬 **Cross-Browser Support** – Chrome, Firefox, Edge… MagnoGrabr bows to none.  
 
 ---
@@ -25,19 +25,19 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 ### 🤠 For Users
 
 
-1. Download the built-version folder in repository
+1. Download the MagnoGrabr.zip file from latest Release<br>[https://github.com/ThePsychof/MagnoGrabr/releases/download/v0.1.0/MagnoGrabr.zip]
 
 2. Go to your browser and open extension menu
 
 3. Activate the dev mode
 
-4. uplouad unpacked
+4. upload unpacked
 
-5. choose the built-version from your pc
+5. choose MagnoGrabr.zip from your pc<br>⚠️ Some browsers require unzipping: Right-click -> **Extract to "MagnoGrabr/"** -> upload the MagnoGrabr folder. 
 
 6. done!
 
-
+---
 
 ### 🧑‍💻 For Devs
 
@@ -112,4 +112,4 @@ const links = await browserAPI.storage.get("links");
 
 ---
 
-  💡 Future updates are comming!
+  💡 Future updates are coming!
