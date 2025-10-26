@@ -1,11 +1,11 @@
 # 🧲 MagnoGrabr
 ### _Hover. Snatch. Rule the Web._
 
-> Because why *click* when you can **grab** everything like a digital raccoon?
+> Because why *click* when you can grab everything like a digital raccoon?
 
 ---
 
-**MagnoGrabr** is a sleek browser extension that lets you **hover over links** and **collect them all** — no clicking, no pain, no chaos.
+MagnoGrabr is a sleek browser extension that lets you hover over links and collect them all — no clicking, no pain, no chaos.
 
 It’s your ultimate link-hoarding sidekick. Activate it, glide over the internet, and it’ll quietly store all those URLs in your browser’s local storage.
 
@@ -13,11 +13,11 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 
 ## 🎮 Features
 
-- 🧲 **Hover to Grab** – Just hover your mouse over links. That’s it. MagnoGrabr does the rest.  
-- ⚙️ **Customizable Hotkeys** – Choose your own activation/deactivation keys. No more fighting your muscle memory.  
-- 🧠 **Smart Storage** – Uses local browser storage, no servers, no spying, no cookies, no nonsense.  
-- 🪄 **Dedupe** – Removes duplicate links like.
-- 🧬 **Cross-Browser Support** – Chrome, Firefox, Edge… MagnoGrabr bows to none.  
+- 🧲 Hover to Grab – Just hover your mouse over links. That’s it. MagnoGrabr does the rest.  
+- ⚙️ Customizable Hotkeys – Choose your own activation/deactivation keys. No more fighting your muscle memory.  
+- 🧠 Smart Storage – Uses local browser storage, no servers, no spying, no cookies, no nonsense.  
+- 🪄 Dedupe – Removes duplicate links like.
+- 🧬 Cross-Browser Support – Chrome, Firefox, Edge… MagnoGrabr bows to none.  
 
 ---
 
@@ -25,29 +25,27 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 ### 🤠 For Users
 
 
-1. Download the built-version folder in repository
+1. Download the MagnoGrabr.zip file from latest Release<br>[https://github.com/ThePsychof/MagnoGrabr/releases/download/v0.1.0/MagnoGrabr.zip]
 
-2. Go to your browser and open extension menu
+3. Go to your browser and open extension menu
 
-3. Activate the dev mode
+4. Activate the dev mode
 
-4. uplouad unpacked
+5. uplouad unpacked
 
-5. choose the built-version from your pc
+6. choose MagnoGrabr.zip from your pc<br>( you may need to unzip it for some browsers, to do so: click on [Extract to "MagnoGrabr/"] and upload the folder) 
 
-6. done!
+7. done!
 
 
 
 ### 🧑‍💻 For Devs
 
 
-```bash
 git clone https://github.com/yourusername/MagnoGrabr.git
 cd MagnoGrabr
 npm install
 npm run build
-```
 Then:
 
 1. Open chrome://extensions (or your browser’s equivalent).
@@ -60,7 +58,7 @@ Then:
 
 ---
 
-🎛️ Settings
+🎛 Settings
 
 Open the popup and hit ⚙️ Settings to:
 
