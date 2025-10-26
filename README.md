@@ -41,11 +41,12 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 
 ### 🧑‍💻 For Devs
 
-
+```bash
 git clone https://github.com/yourusername/MagnoGrabr.git
 cd MagnoGrabr
 npm install
 npm run build
+```
 Then:
 
 1. Open chrome://extensions (or your browser’s equivalent).
