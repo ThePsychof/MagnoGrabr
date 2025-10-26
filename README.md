@@ -29,11 +29,11 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 
 3. Go to your browser and open extension menu
 
-4. Activate the dev mode
+4. Activate the **dev mode**
 
 5. uplouad unpacked
 
-6. choose MagnoGrabr.zip from your pc<br>( you may need to unzip it for some browsers, to do so: click on [Extract to "MagnoGrabr/"] and upload the folder) 
+6. choose MagnoGrabr.zip from your pc<br>⚡Some browsers require unzipping. Right-click => click **`Extract to "MagnoGrabr/"`** => upload the folder
 
 7. done!
 
