@@ -3,6 +3,7 @@ import type { GrabbedLink } from "../utils/helpers";
 import { browserAPI, type ExtensionSettings } from "../utils/browser-api";
 import { KeyCapture, getKeyDisplayName, isValidKey } from "../utils/key-capture";
 import { Github } from "lucide-react";
+import { clickReset, clickSave } from "../options/Options";
 
 declare const browser: any;
 declare const chrome: any;
@@ -299,13 +300,13 @@ export default function Popup() {
         <div className="flex gap-2 pt-4">
           <button 
             className="flex-1 px-3 py-2 bg-red-600 rounded hover:bg-red-700"
-            onClick={saveSettings}
+            onClick={clickSave(settings)}
           >
             Save
           </button>
           <button 
             className="flex-1 px-3 py-2 bg-zinc-700 rounded hover:bg-zinc-600"
-            onClick={resetSettings}
+            onClick={clickReset(setSettings)}
           >
             Reset
           </button>
