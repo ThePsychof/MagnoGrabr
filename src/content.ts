@@ -82,17 +82,31 @@ export class LinkGrabber {
   /** Keyboard handlers */
   private onKeyDown(e: KeyboardEvent): void {
     if (!this.settings) return;
-    if (e.code === this.settings.activationKey && !this.isActive) {
-      this.toggleGrabber(true);
+
+    const isToggleMode = this.settings.toggleMode ?? false;
+
+    // Activation key
+    if (e.code === this.settings.activationKey) {
+      if (isToggleMode) {
+        // Toggle on/off each press
+        this.toggleGrabber(!this.isActive);
+      } else {
+        // Hold mode: activate only while holding
+        if (!this.isActive) this.toggleGrabber(true);
+      }
     }
-    if (e.code === this.settings.endKey && this.isActive && e.shiftKey) {
+
+    // End key
+    // Finalize session whenever grabber is active, works in both modes
+    if (e.code === this.settings.endKey && this.isActive) {
       this.finalizeSession();
     }
   }
 
   private onKeyUp(e: KeyboardEvent): void {
     if (!this.settings) return;
-    if (e.code === this.settings.activationKey && this.isActive) {
+    if (!this.settings.toggleMode && e.code === this.settings.activationKey && this.isActive) {
+      // only run in hold mode
       this.toggleGrabber(false);
     }
   }

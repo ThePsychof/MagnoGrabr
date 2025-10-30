@@ -73,17 +73,6 @@ try {
     }
   }
 
-  // 3️⃣ Copy icons files
-  const iconsFiles = ["MagnoGrabr16.png", "MagnoGrabr32.png", "MagnoGrabr48.png", "MagnoGrabr128.png"];
-  for (const iconsFile of iconsFiles) {
-    const iconsSrc = path.join(root, "public", "icons", iconsFile);
-    const iconsDest = path.join(dist, "icons", iconsFile);
-    if (fs.existsSync(iconsSrc)) {
-      copyFile(iconsSrc, iconsDest);
-    } else {
-      log.warn(`public/icons/${iconsFile} missing`);
-    }
-  }
 
   // 3.5️⃣ Copy cursor.png
   const cursorSrc = path.join(root, "public", "cursor.png");

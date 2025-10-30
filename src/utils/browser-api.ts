@@ -71,6 +71,18 @@ export interface ExtensionSettings {
   notifyDuration: number;
 }
 
+export const DEFAULT_SETTINGS: ExtensionSettings = {
+  activationKey: "ShiftLeft",
+  endKey: "ControlLeft",
+  toggleMode: false,
+  dedupe: true,
+  deepResolve: false,
+  grabDelay: 250,
+  effects: true,
+  highlightColor: "#4CAF50",
+  notifyDuration: 2000,
+}
+
 export interface DownloadSettings {
   useNative: boolean;
   savePath: string;
@@ -222,7 +234,7 @@ class BrowserAPIService {
   }
 
   async setSettings(settings: Partial<ExtensionSettings>): Promise<void> {
-    const current = await this.getSettings();
+    const current = (await this.getSettings()) ?? DEFAULT_SETTINGS;
     await this.storageSet({
       [STORAGE_KEYS.SETTINGS]: { ...current, ...settings },
     });
@@ -284,17 +296,7 @@ class BrowserAPIService {
   }
 
   private getDefaultSettings(): ExtensionSettings {
-    return {
-      activationKey: "ShiftLeft",
-      endKey: "ControlLeft",
-      toggleMode: false,
-      dedupe: true,
-      deepResolve: true,
-      grabDelay: 500,
-      effects: true,
-      highlightColor: "#4CAF50",
-      notifyDuration: 2000,
-    };
+    return DEFAULT_SETTINGS;
   }
 
   private getDefaultDownloadSettings(): DownloadSettings {

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import type { GrabbedLink } from "../utils/helpers";
-import { browserAPI, type ExtensionSettings } from "../utils/browser-api";
+import { browserAPI, DEFAULT_SETTINGS, type ExtensionSettings } from "../utils/browser-api";
 import { KeyCapture, getKeyDisplayName, isValidKey } from "../utils/key-capture";
 import { Github } from "lucide-react";
-import { clickReset, clickSave } from "../options/Options";
-
-declare const browser: any;
-declare const chrome: any;
+import { clickReset, clickSave, grabDelay, toggleMode } from "../options/Options";
+import { showToast } from "../utils/toastHelper";
+import '../styles/tailwind.css';
 
 type Grouped = Record<string, GrabbedLink[]>;
 
@@ -20,28 +19,24 @@ export default function Popup() {
   const [links, setLinks] = useState<GrabbedLink[]>([]);
   const [grouped, setGrouped] = useState<Grouped>({});
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState<ExtensionSettings>({
-    activationKey: "ShiftLeft",
-    endKey: "ControlLeft",
-    toggleMode: false,
-    dedupe: true,
-    deepResolve: true,
-    grabDelay: 500,
-    effects: true,
-    highlightColor: "#4CAF50",
-    notifyDuration: 2000,
-  });
+  const [settings, setSettings] = useState<ExtensionSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const loaded = await browserAPI.getSettings();
+        setSettings(loaded);
+      } catch {
+        setSettings(DEFAULT_SETTINGS); // fallback
+      }
+    })();
+  }, []);
+  
   const [capturingKey, setCapturingKey] = useState<'activation' | 'end' | null>(null);
 
   const STORAGE_KEY = "MagnoGrabr_links";
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2000);
-  };
 
   const loadSession = async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
@@ -51,12 +46,12 @@ export default function Popup() {
       setLinks(session);
       setGrouped(groupLinks(session));
       setLoading(false);
-      if (showRefresh) showToast(`Refreshed - ${session.length} links`);
+      if (showRefresh) showToast(`Refreshed - ${session.length} links`, "success");
     } catch {
       setLinks([]);
       setGrouped({});
       setLoading(false);
-      if (showRefresh) showToast("No links found");
+      if (showRefresh) showToast("No links found", "info");
     } finally {
       if (showRefresh) setRefreshing(false);
     }
@@ -64,61 +59,35 @@ export default function Popup() {
 
   useEffect(() => {
     loadSession();
-    loadSettings();
+    loadSettingsMerged();
   }, []);
 
-  const loadSettings = async () => {
+  const loadSettingsMerged = async () => {
     try {
       const loadedSettings = await browserAPI.getSettings();
-      setSettings(loadedSettings);
-    } catch (error) {
-      // Settings will use defaults if loading fails
+      setSettings(prev => ({ ...DEFAULT_SETTINGS, ...loadedSettings }));
+      showToast("Settings loaded" , "success");
+    } catch {
+      setSettings(DEFAULT_SETTINGS);
+      showToast("No settings found", "info");
     }
-  };
-
-  const saveSettings = async () => {
-    try {
-      await browserAPI.setSettings(settings);
-      showToast("Settings saved!");
-    } catch (error) {
-      showToast("Failed to save settings");
-    }
-  };
-
-  const resetSettings = async () => {
-    const defaultSettings: ExtensionSettings = {
-      activationKey: "ShiftLeft",
-      endKey: "ControlLeft",
-      toggleMode: false,
-      dedupe: true,
-      deepResolve: true,
-      grabDelay: 500,
-      effects: true,
-      highlightColor: "#4CAF50",
-      notifyDuration: 2000,
-    };
-    setSettings(defaultSettings);
-    try {
-      await browserAPI.setSettings(defaultSettings);
-      showToast("Settings reset to defaults!");
-    } catch (error) {
-      showToast("Failed to reset settings");
-    }
-  };
+  }
 
   const startKeyCapture = (keyType: 'activation' | 'end') => {
     setCapturingKey(keyType);
     
+
     const keyCapture = new KeyCapture({
-      onKeyCaptured: (key) => {
+      onKeyCaptured: (key: string) => {
         if (keyType === 'activation') {
           setSettings(prev => ({ ...prev, activationKey: key }));
         } else {
           setSettings(prev => ({ ...prev, endKey: key }));
         }
         setCapturingKey(null);
-        showToast(`Key captured: ${getKeyDisplayName(key)}`);
+        showToast(`Key captured: ${getKeyDisplayName(key)}`, "success");
       },
+
       onCancel: () => {
         setCapturingKey(null);
       },
@@ -131,30 +100,51 @@ export default function Popup() {
   const copyAll = async () => {
     if (!links.length) return;
     await navigator.clipboard.writeText(links.map(l => l.normalized).join("\n"));
-    showToast(`Copied ${links.length} link${links.length > 1 ? "s" : ""}`);
+    showToast(`Copied ${links.length} link${links.length > 1 ? "s" : ""}`, "success");
+  };
+
+  const exportAll = async () => {
+      if (!links.length) return showToast("No links to export!", "error");
+
+      const text = links.map(l => l.normalized).join("\n");
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      a.download = `MagnoGrabr_Links_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}_${pad(now.getMinutes())}_${pad(now.getSeconds())}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      showToast(`Exported ${links.length} link${links.length > 1 ? "s" : ""}!`, "success");
   };
 
   const downloadAll = async () => {
     if (!links.length) return;
     try {
       await browserAPI.sendMessage({ type: "DOWNLOAD_URLS", payload: { urls: links.map(l => l.normalized) } });
-      showToast("Download started");
+      showToast("Download started", "success");
     } catch {
-      showToast("Download failed");
+      showToast("Download failed", "error");
     }
   };
 
   const copyOne = async (url: string) => {
     await navigator.clipboard.writeText(url);
-    showToast("Copied");
+    showToast("Copied", "success");
   };
 
   const downloadOne = async (url: string) => {
     try {
       await browserAPI.sendMessage({ type: "DOWNLOAD_URLS", payload: { urls: [url] } });
-      showToast("Downloading...");
+      showToast("Downloading...", "info");
     } catch {
-      showToast("Download failed");
+      showToast("Download failed", "error");
     }
   };
 
@@ -188,12 +178,15 @@ export default function Popup() {
         <button onClick={copyAll} className="px-3 py-1 bg-red-600 rounded hover:bg-red-700">
           Copy All
         </button>
+        <button onClick={exportAll} className="px-3 py-1 bg-red-600 rounded hover:bg-red-700">
+          Export All
+        </button>
         <button onClick={downloadAll} className="px-3 py-1 bg-red-600 rounded hover:bg-red-700">
           Download All
         </button>
       </div>
 
-      <div className="space-y-4 max-h-[420px] overflow-auto pr-1">
+      <div className="space-y-4 max-h-[420px] overflow-y-scroll pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-black [&::-webkit-scrollbar-thumb]:bg-red-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-red-600 [scrollbar-width]:thin [scrollbar-color]:red-600">
         {Object.entries(grouped).map(([cat, items]) => (
           <div key={cat}>
             <div className="text-sm text-zinc-400 mb-1 uppercase tracking-wide">{cat}</div>
@@ -240,9 +233,10 @@ export default function Popup() {
 
       {!loading && links.length === 0 && (
         <div className="text-center">
-          <div className="text-zinc-500 mb-3">No links captured yet.</div>
-          <div className="text-zinc-400 text-sm mb-3">
-            Hold {getKeyDisplayName(settings.activationKey)} to capture links, then {getKeyDisplayName(settings.activationKey)}+{getKeyDisplayName(settings.endKey)} to save them here.
+          <div className="text-zinc-500 mb-3"><p>No links captured yet.</p></div>
+          <div className="mb-3">
+            <p className="font-semibold text-zinc-400 text-sm mb-1">Reload page before using MagnoGrabr</p>
+            <p className="text-zinc-400 text-xs">Hold {getKeyDisplayName(settings.activationKey)} to capture links, then {getKeyDisplayName(settings.activationKey)}+{getKeyDisplayName(settings.endKey)} to save them here.</p>
           </div>
         </div>
       )}
@@ -279,7 +273,7 @@ export default function Popup() {
           </div>
 
           <div>
-            <label className="block text-sm text-zinc-400 mb-2">End Key (open popup)</label>
+            <label className="block text-sm text-zinc-400 mb-2">End Key (may not work with some keys)</label>
             <button
               className={`w-full p-3 rounded text-left ${
                 capturingKey === 'end' 
@@ -296,11 +290,47 @@ export default function Popup() {
             </button>
           </div>
         </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => toggleMode(setSettings)}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 select-none
+              ${settings?.toggleMode
+                ? "bg-red-600 hover:bg-red-700 text-white"
+                : "bg-zinc-800 hover:bg-zinc-700 text-zinc-200"}`}
+          >
+            Toggle Mode
+          </button>
+          <div className="relative group inline-block">
+            <input
+              type="number"
+              step="10"
+              min="0"
+              value={settings.grabDelay ?? 0}
+              onChange={(e) => {
+                const newVal = Number(e.target.value);
+                setSettings((prev) => ({ ...prev, grabDelay: newVal }));
+              }}
+              placeholder="Grab delay (ms)"
+              className="w-28 p-2 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 
+                        focus:outline-none focus:ring-2 focus:ring-red-700 
+                        appearance-none 
+                        [&::-webkit-inner-spin-button]:appearance-none 
+                        [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            {/* tooltip */}
+            <span className="absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 hover:opacity-100 group-hover:opacity-100 pointer-events-none bg-zinc-900 text-white text-xs px-3 py-1 rounded-lg shadow-md transition-opacity duration-300 whitespace-nowrap translate-y-1 group-hover:-translate-y-1">Grab delay in ms</span>
+          </div>
+        </div>
 
         <div className="flex gap-2 pt-4">
           <button 
             className="flex-1 px-3 py-2 bg-red-600 rounded hover:bg-red-700"
-            onClick={clickSave(settings)}
+            onClick={async (e) => {
+              e.preventDefault();
+              await grabDelay(settings.grabDelay);
+              await clickSave(settings)(e);
+            }}
           >
             Save
           </button>
@@ -328,13 +358,7 @@ export default function Popup() {
 
   return (
     <div className="p-4 bg-zinc-900 min-w-[360px] text-white font-mono relative">
-      <h2 className="text-lg text-red-500 mb-3 font-semibold">MagnoGrabr</h2>
-
-      {toast && (
-        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-zinc-800 text-sm px-3 py-1 rounded shadow-lg animate-fadeIn">
-          {toast}
-        </div>
-      )}
+      <h2 className="text-2xl text-red-700 mb-3 font-semibold">MagnoGrabr</h2>
 
       {loading && <div className="text-zinc-400">Loading…</div>}
 

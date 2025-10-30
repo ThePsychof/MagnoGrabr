@@ -25,7 +25,7 @@ It’s your ultimate link-hoarding sidekick. Activate it, glide over the interne
 ### 🤠 For Users
 
 
-1. Download the MagnoGrabr.zip file from latest Release<br>[https://github.com/ThePsychof/MagnoGrabr/releases/download/v0.1.0/MagnoGrabr.zip]
+1. Download the MagnoGrabr.zip file from latest Release<br>[https://github.com/ThePsychof/MagnoGrabr/releases/download/v0.2.0/MagnoGrabr.zip]
 
 3. Go to your browser and open extension menu
 

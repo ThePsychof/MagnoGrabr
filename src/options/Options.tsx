@@ -1,21 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { browserAPI, type ExtensionSettings } from "../utils/browser-api";
+import { browserAPI, type ExtensionSettings, DEFAULT_SETTINGS } from "../utils/browser-api";
+import { showToast } from "../utils/toastHelper";
+import '../styles/tailwind.css';
 
-const DEFAULT_SETTINGS: Readonly<ExtensionSettings> = {
-  activationKey: "ShiftLeft",
-  endKey: "ControlLeft",
-  toggleMode: false,
-  dedupe: true,
-  deepResolve: false,
-  grabDelay: 250,
-  effects: true,
-  highlightColor: "#4CAF50",
-  notifyDuration: 2000,
-};
-export async function loadSettings(): Promise<ExtensionSettings> {
-  const stored = await browserAPI.getSettings();
-  return { ...DEFAULT_SETTINGS, ...(stored ?? {}) };
-}
+
 
 export async function saveSettings(settings: ExtensionSettings): Promise<void> {
   await browserAPI.setSettings(settings);
@@ -33,25 +21,51 @@ export async function updateSetting<K extends keyof ExtensionSettings>(
   value: ExtensionSettings[K]
 ): Promise<void> {
   const current = await browserAPI.getSettings();
-  const merged: ExtensionSettings = { ...DEFAULT_SETTINGS, ...(current ?? {}), [key]: value };
+  const merged: ExtensionSettings = { ...(current ?? {}), [key]: value };
   await browserAPI.setSettings(merged);
+}
+
+
+export async function toggleMode(
+  setSettings: React.Dispatch<React.SetStateAction<ExtensionSettings>>
+) {
+  const current = await browserAPI.getSettings();
+  const newStat = !current.toggleMode; // invert current stored value
+  const merged = { ...current, toggleMode: newStat };
+
+  await browserAPI.setSettings(merged);
+  setSettings(merged); // sync React state
+  showToast(newStat ? "Toggle mode enabled" : "Toggle mode disabled", "success");
+}
+
+export async function grabDelay(value: number) {
+  await updateSetting("grabDelay", value);
+  showToast(`Grab delay set to ${value}ms`, "success");
 }
 
 
 export function clickSave(settings: ExtensionSettings): React.MouseEventHandler<HTMLButtonElement> {
   return async () => {
     await saveSettings(settings);
+     showToast("Settings saved!", "success");
   };
 }
 
 export function clickReset(
   setSettings: React.Dispatch<React.SetStateAction<ExtensionSettings>>
 ): React.MouseEventHandler<HTMLButtonElement> {
-  return async () => {
+  return async (event) => {
+    event.preventDefault();
     const defaults = await resetSettings();
     setSettings(defaults);
+    showToast("Settings reset to defaults!", "success");
   };
 }
+
+
+
+
+
 
 export default function Options() {
   return<></>

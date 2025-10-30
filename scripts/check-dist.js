@@ -28,12 +28,7 @@ const required = [
   "options.css",
   "style.css",
   "cursor.png",
-  "icons/MagnoGrabr16.png",
-  "icons/MagnoGrabr32.png",
-  "icons/MagnoGrabr48.png",
-  "icons/MagnoGrabr128.png",
   "icons/MagnoGrabr.png",
-  "icons/MagnoGrabrCursor.svg"
 ];
 
 // Check for unwanted files
