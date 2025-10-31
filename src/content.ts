@@ -1,7 +1,9 @@
 import { browserAPI } from "./utils/browser-api";
 import { uid, normalizeHref, categorizeUrl, type GrabbedLink } from "./utils/helpers";
-import type { ExtensionSettings } from "./utils/browser-api";
+import type { ExtensionSettings, DEFAULT_SETTINGS } from "./utils/browser-api";
 import './styles/tailwind.css';
+import { showToast } from "./utils/toastHelper";
+import { useState } from "react";
 
 // Check which browser we're in with detailed detection
 declare const browser: any;
@@ -128,8 +130,18 @@ export class LinkGrabber {
     state ? this.activateUI() : this.deactivateUI();
   }
 
-  private applyCursor(): void {
-    const cursorUrl = browserAPI.getResourceUrl("cursor.png");
+  public setCursor() {
+    this.applyCursor();
+  }
+  private async applyCursor(): Promise<void> {
+    const settings = await browserAPI.getSettings();
+    const cursorflag = settings.cursorFlag;
+    let cursorUrl : string;
+    if (cursorflag) {
+      cursorUrl = settings.customCursor!;
+    } else {
+      cursorUrl = browserAPI.getResourceUrl(settings.defaultCursor);
+    }
 
     let styleEL = document.getElementById("Cursor") as HTMLStyleElement | null;
     if (!styleEL) {
@@ -141,7 +153,6 @@ export class LinkGrabber {
 
     document.body.classList.add('cursor-MagnoGrabr');
   }
-  
   private resetCursor(): void {
     document.body.classList.remove('cursor-MagnoGrabr');
   }
@@ -253,7 +264,7 @@ export class LinkGrabber {
       position: "fixed",
       left: `${rect.left + rect.width / 2}px`,
       top: `${rect.top}px`,
-      color: "lime",
+      color: "red",
       fontWeight: "bold",
       zIndex: "999999",
       transition: "all 0.8s ease-out",

@@ -69,6 +69,9 @@ export interface ExtensionSettings {
   effects: boolean;
   highlightColor: string;
   notifyDuration: number;
+  defaultCursor: string;
+  customCursor?: string;
+  cursorFlag: boolean;
 }
 
 export const DEFAULT_SETTINGS: ExtensionSettings = {
@@ -81,6 +84,9 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   effects: true,
   highlightColor: "#4CAF50",
   notifyDuration: 2000,
+  defaultCursor: "cursor.png",
+  customCursor: "",
+  cursorFlag: false
 }
 
 export interface DownloadSettings {

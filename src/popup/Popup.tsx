@@ -3,9 +3,10 @@ import type { GrabbedLink } from "../utils/helpers";
 import { browserAPI, DEFAULT_SETTINGS, type ExtensionSettings } from "../utils/browser-api";
 import { KeyCapture, getKeyDisplayName, isValidKey } from "../utils/key-capture";
 import { Github } from "lucide-react";
-import { clickReset, clickSave, grabDelay, toggleMode } from "../options/Options";
+import { clickReset, clickSave, grabDelay, toggleMode, updateSetting } from "../options/Options";
 import { showToast } from "../utils/toastHelper";
 import '../styles/tailwind.css';
+import { LinkGrabber } from "../content";
 
 type Grouped = Record<string, GrabbedLink[]>;
 
@@ -23,6 +24,7 @@ export default function Popup() {
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<ExtensionSettings>(DEFAULT_SETTINGS);
 
+  const grabber = new LinkGrabber();
   useEffect(() => {
     (async () => {
       try {
@@ -320,6 +322,86 @@ export default function Popup() {
             />
             {/* tooltip */}
             <span className="absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 hover:opacity-100 group-hover:opacity-100 pointer-events-none bg-zinc-900 text-white text-xs px-3 py-1 rounded-lg shadow-md transition-opacity duration-300 whitespace-nowrap translate-y-1 group-hover:-translate-y-1">Grab delay in ms</span>
+          </div>
+
+          <div>
+            <label 
+              htmlFor="custom-cursor"
+              className = "w-60 h-20 p-2 rounded-lg bg-zinc-800 text-white cursor-pointer hover:bg-zinc-700 transition-all duration-200 border border-zinc-700 hover:border-red-600"
+              >
+              Uploud custom Cursor
+            </label>
+            <input
+              placeholder="cursor"
+              type="file"
+              accept="image/png, image/svg+xml, image/gif"
+              id="custom-cursor"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const img = new Image();
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                  img.src = reader.result as string;
+                };
+
+                img.onload = async () => {
+                  // Resize to 16x16 max
+                  const canvas = document.createElement("canvas");
+                  const maxSize = 32;
+                  let w = img.width;
+                  let h = img.height;
+
+                  if (w > h && w > maxSize) {
+                    h = (h / w) * maxSize;
+                    w = maxSize;
+                  } else if (h > maxSize) {
+                    w = (w / h) * maxSize;
+                    h = maxSize;
+                  }
+
+                  canvas.width = w;
+                  canvas.height = h;
+                  const ctx = canvas.getContext("2d");
+                  ctx?.drawImage(img, 0, 0, w, h);
+
+                  const base64 = canvas.toDataURL("image/png");
+
+                  // Save to state + browser
+                  setSettings(prev => ({ ...prev, customCursor: base64 }));
+                  await browserAPI.setSettings({ ...settings, customCursor: base64 });
+                  await updateSetting("customCursor", base64);
+
+                  showToast("Custom cursor loaded and resized!", "success");
+                };
+
+                reader.readAsDataURL(file);
+              }}
+            />
+          </div>
+          <div className="flex flex-row gap-2">
+              {settings.defaultCursor && (
+              <img
+                src={settings.defaultCursor}
+                alt="default"
+                className={`mt-2 w-10 h-10 object-contain border-4 rounded ${settings.cursorFlag ? 'border-zinc-600' : 'border-red-600'}`}
+                onClick={() =>
+                    setSettings(prev => ({ ...prev, cursorFlag: false }))
+                }
+              />
+              )}
+              {settings.customCursor && (
+              <img
+                src={settings.customCursor}
+                alt="custom"
+                className={`mt-2 w-10 h-10 object-contain border-4 rounded ${settings.cursorFlag ? 'border-red-600' : 'border-zinc-600'}`}
+                onClick={() => setSettings(prev => ({ ...prev, cursorFlag: true }))
+                }
+              />
+              )}
           </div>
         </div>
 
