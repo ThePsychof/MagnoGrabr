@@ -3,18 +3,14 @@ import { browserAPI, type ExtensionSettings, DEFAULT_SETTINGS } from "../utils/b
 import { showToast } from "../utils/toastHelper";
 import '../styles/tailwind.css';
 
-
-
 export async function saveSettings(settings: ExtensionSettings): Promise<void> {
   await browserAPI.setSettings(settings);
 }
-
 
 export async function resetSettings(): Promise<ExtensionSettings> {
   await browserAPI.setSettings(DEFAULT_SETTINGS);
   return DEFAULT_SETTINGS;
 }
-
 
 export async function updateSetting<K extends keyof ExtensionSettings>(
   key: K,
@@ -24,7 +20,6 @@ export async function updateSetting<K extends keyof ExtensionSettings>(
   const merged: ExtensionSettings = { ...(current ?? {}), [key]: value };
   await browserAPI.setSettings(merged);
 }
-
 
 export async function toggleMode(
   setSettings: React.Dispatch<React.SetStateAction<ExtensionSettings>>
@@ -43,11 +38,10 @@ export async function grabDelay(value: number) {
   showToast(`Grab delay set to ${value}ms`, "success");
 }
 
-
 export function clickSave(settings: ExtensionSettings): React.MouseEventHandler<HTMLButtonElement> {
   return async () => {
     await saveSettings(settings);
-     showToast("Settings saved!", "success");
+    showToast("Settings saved!", "success");
   };
 }
 

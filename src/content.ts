@@ -1,29 +1,36 @@
-import { browserAPI } from "./utils/browser-api";
-import { uid, normalizeHref, categorizeUrl, type GrabbedLink } from "./utils/helpers";
-import type { ExtensionSettings, DEFAULT_SETTINGS } from "./utils/browser-api";
+import { browserAPI, DEFAULT_SETTINGS } from "./utils/browser-api";
+import { uid, normalizeHref, categorizeUrl, type GrabbedLink } from "./utils/linkCategorizer";
+import type { ExtensionSettings } from "./utils/browser-api";
 import './styles/tailwind.css';
+import { initThemeFromSettings } from "./utils/theme";
 import { showToast } from "./utils/toastHelper";
-import { useState } from "react";
+import { getLinkInfo } from "./utils/getLinkInfo";
+import { MessageTypes } from "./utils/browser-api";
+import "./utils/extractAll";
 
-// Check which browser we're in with detailed detection
+// keep runtime detection granular so cursor/theme logic adapts per browser.
 declare const browser: any;
 declare const chrome: any;
 
 function detectBrowserName() {
   const userAgent = navigator.userAgent.toLowerCase();
-  
+
   if (typeof browser !== "undefined" && browser.runtime) {
     return "Firefox";
   }
   if (typeof chrome !== "undefined" && chrome.runtime) {
     // Check more specific browsers first!
     // Brave - check for navigator.brave API
-    if ((navigator as any).brave && typeof (navigator as any).brave.isBrave === 'function') {
+    if (
+      (navigator as any).brave &&
+      typeof (navigator as any).brave.isBrave === "function"
+    ) {
       return "Brave";
     }
     if (userAgent.includes("opr") || userAgent.includes("opera")) return "Opera";
     if (userAgent.includes("edg")) return "Edge";
-    if (userAgent.includes("safari") && !userAgent.includes("chrome")) return "Safari";
+    if (userAgent.includes("safari") && !userAgent.includes("chrome"))
+      return "Safari";
     return "Chrome";
   }
   return "Unknown";
@@ -41,10 +48,15 @@ export class LinkGrabber {
   private isActive = false;
   private settings: ExtensionSettings | null = null;
   private grabbed = new Map<string, GrabbedLink>();
+  // Track in-flight metadata probes per-normalized URL so we can await them on finalize
+  private pending = new Map<string, Promise<void>>();
   private notifier: HTMLElement | null = null;
+  private notifierMoveHandler: ((e: MouseEvent) => void) | null = null;
+  private lastMousePos: { x: number; y: number } | null = null;
   private lastHoveredEl: Element | null = null;
   private hoverTimer: number | null = null;
   private eventListeners: EventListenerEntry[] = [];
+  private storageChangeHandler: ((changes: any, area: string) => void) | null = null;
   private readonly STORAGE_KEY = "MagnoGrabr_links";
 
   /** Initialize the grabber: load settings, attach events */
@@ -55,6 +67,23 @@ export class LinkGrabber {
       throw new Error("Failed to initialize LinkGrabber: Could not load settings");
     }
     this.attachGlobalEvents();
+    try { initThemeFromSettings(this.settings || undefined); } catch {}
+
+    const ext = (typeof browser !== 'undefined' && browser.storage) ? browser : (typeof chrome !== 'undefined' && chrome.storage) ? chrome : null;
+    if (ext && ext.storage && ext.storage.onChanged) {
+      this.storageChangeHandler = (changes: any, area: string) => {
+        if (area !== 'local') return;
+        try {
+          if (changes && changes.settings) {
+            const newSettings = changes.settings.newValue || changes.settings;
+            this.settings = { ...(this.settings || (DEFAULT_SETTINGS as any)), ...(newSettings || {}) } as ExtensionSettings;
+            // Re-apply theme when settings change so content reflects new theme
+            try { initThemeFromSettings(newSettings || this.settings || undefined); } catch {}
+          }
+        } catch {}
+      };
+      try { ext.storage.onChanged.addListener(this.storageChangeHandler); } catch {}
+    }
   }
 
   /** Attach key & mouse events */
@@ -79,6 +108,12 @@ export class LinkGrabber {
     this.removeNotifier();
     this.grabbed.clear();
     this.isActive = false;
+    // remove storage change listener if attached
+    const ext = (typeof browser !== 'undefined' && browser.storage) ? browser : (typeof chrome !== 'undefined' && chrome.storage) ? chrome : null;
+    if (ext && ext.storage && ext.storage.onChanged && this.storageChangeHandler) {
+      try { ext.storage.onChanged.removeListener(this.storageChangeHandler); } catch {}
+      this.storageChangeHandler = null;
+    }
   }
 
   /** Keyboard handlers */
@@ -87,13 +122,19 @@ export class LinkGrabber {
 
     const isToggleMode = this.settings.toggleMode ?? false;
 
-    // Activation key
+    // activation key is either toggle or hold depending on settings.
     if (e.code === this.settings.activationKey) {
       if (isToggleMode) {
-        // Toggle on/off each press
-        this.toggleGrabber(!this.isActive);
+        if (!this.isActive) {
+          this.toggleGrabber(true);
+        } else {
+          if (this.settings?.oneKeyMode) {
+            this.finalizeSession();
+          } else {
+            this.toggleGrabber(false);
+          }
+        }
       } else {
-        // Hold mode: activate only while holding
         if (!this.isActive) this.toggleGrabber(true);
       }
     }
@@ -108,13 +149,17 @@ export class LinkGrabber {
   private onKeyUp(e: KeyboardEvent): void {
     if (!this.settings) return;
     if (!this.settings.toggleMode && e.code === this.settings.activationKey && this.isActive) {
-      // only run in hold mode
-      this.toggleGrabber(false);
+      if (this.settings.oneKeyMode) {
+        this.finalizeSession();
+      } else {
+        this.toggleGrabber(false);
+      }
     }
   }
 
   /** Mouse hover capture */
   private onMouseMove(e: MouseEvent): void {
+    this.lastMousePos = { x: e.clientX, y: e.clientY };
     if (!this.isActive || !this.settings) return;
     const el = e.target as Element;
     if (el === this.lastHoveredEl) return;
@@ -136,11 +181,12 @@ export class LinkGrabber {
   private async applyCursor(): Promise<void> {
     const settings = await browserAPI.getSettings();
     const cursorflag = settings.cursorFlag;
-    let cursorUrl : string;
-    if (cursorflag) {
-      cursorUrl = settings.customCursor!;
+    let cursorUrl: string = '';
+    if (cursorflag && settings.customCursor) {
+      cursorUrl = settings.customCursor;
     } else {
-      cursorUrl = browserAPI.getResourceUrl(settings.defaultCursor);
+      const res = browserAPI.getResourceUrl(settings.defaultCursor);
+      cursorUrl = res || '';
     }
 
     let styleEL = document.getElementById("Cursor") as HTMLStyleElement | null;
@@ -149,7 +195,12 @@ export class LinkGrabber {
       styleEL.id = "Cursor";
       document.head.appendChild(styleEL);
     }
-    styleEL.innerHTML = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: url("${cursorUrl}") 16 16, crosshair !important; }`;
+    // only include url(...) when provided, otherwise force crosshair for clarity.
+    if (cursorUrl) {
+      styleEL.innerHTML = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: url("${cursorUrl}") 16 16, crosshair !important; }`;
+    } else {
+      styleEL.innerHTML = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: crosshair !important; }`;
+    }
 
     document.body.classList.add('cursor-MagnoGrabr');
   }
@@ -172,36 +223,73 @@ export class LinkGrabber {
     if (this.notifier) return;
     this.notifier = document.createElement("div");
     this.notifier.id = "magnoNotifier";
+    // small floating badge mirrors cursor so users know grabber state.
     Object.assign(this.notifier.style, {
       position: "fixed",
-      top: "10px",
-      right: "10px",
-      background: "rgba(0,0,0,0.8)",
-      color: "white",
-      padding: "8px 12px",
-      borderRadius: "8px",
+      left: "0px",
+      top: "0px",
+      width: "28px",
+      height: "28px",
+      minWidth: "28px",
+      background: "var(--RootBG)",
+      color: "var(--TextIn)",
+      padding: "0 4px",
+      borderRadius: "50%",
       zIndex: "999999",
-      fontSize: "12px",
+      fontSize: "16px",
       fontFamily: "monospace",
-      border: "2px solid #ff6b6b",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+      border: "2px solid var(--ButtonActive)",
+      boxShadow: "0 4px 12px var(--RootBG)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      pointerEvents: "none",
+      transform: "translateY(-50%)",
     });
+
     document.body.appendChild(this.notifier);
     this.updateNotifier();
+
+    const offset = 33;
+    this.notifier.style.transition = 'transform 0.08s linear';
+    this.notifier.style.transform = `translate3d(0px, 0px, 0) translate(-50%,-50%)`;
+
+    const applyPosition = (x: number, y: number) => {
+      if (!this.notifier) return;
+      this.notifier.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%,-50%)`;
+    };
+
+    const initialPos = this.lastMousePos;
+    if (initialPos) {
+      applyPosition(initialPos.x + offset, initialPos.y);
+    }
+
+    this.notifierMoveHandler = (e: MouseEvent) => {
+      if (!this.notifier) return;
+      const x = e.clientX + offset;
+      const y = e.clientY;
+      // use transforms for buttery movement without repaint churn.
+      applyPosition(x, y);
+    };
+    document.addEventListener('mousemove', this.notifierMoveHandler);
   }
 
   private removeNotifier(): void {
     if (!this.notifier) return;
     this.notifier.remove();
     this.notifier = null;
+    if (this.notifierMoveHandler) {
+      try { document.removeEventListener('mousemove', this.notifierMoveHandler); } catch {}
+      this.notifierMoveHandler = null;
+    }
   }
 
   private updateNotifier(): void {
     if (!this.notifier) return;
+    const count = this.grabbed.size || 0;
+    const displayCount = count > 99 ? "99+" : String(count);
     this.notifier.innerHTML = `
-      <div style="color: #ff6b6b; font-weight: bold;">🔗 MagnoGrabr Active</div>
-      <div style="font-size: 10px; margin-top: 2px;">Captured: ${this.grabbed.size}</div>
-      <div style="font-size: 9px; margin-top: 1px; color: #94a3b8;">Shift+Ctrl to save</div>
+      <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:600;font-size:14px;">${displayCount}</div>
     `;
   }
 
@@ -219,18 +307,93 @@ export class LinkGrabber {
 
     if (this.settings.dedupe && this.grabbed.has(normalized)) return;
 
+    const typeAttr = linkEl.getAttribute?.("type");
+    const dataMime = linkEl.getAttribute?.("data-mime");
+    const dataType = linkEl.getAttribute?.("data-type") ?? linkEl.getAttribute?.("data-filetype");
+    const downloadAttr = linkEl instanceof HTMLAnchorElement ? linkEl.getAttribute("download") : null;
+    const dataFilename = linkEl.getAttribute?.("data-filename");
+    const mimeHint = typeAttr && typeAttr.includes("/") ? typeAttr : dataMime || null;
+    const typeHint = !mimeHint ? (dataType || (typeAttr && !typeAttr.includes("/") ? typeAttr : null)) : dataType ?? null;
+
     const link: GrabbedLink = {
       id: uid(),
       url: href,
       normalized,
-      category: categorizeUrl(normalized),
+      category: categorizeUrl(normalized, {
+        filename: downloadAttr || dataFilename || null,
+        mime: mimeHint || undefined,
+        typeHint: typeHint || undefined,
+      }),
       text: linkEl.textContent?.trim() ?? "",
       timestamp: Date.now(),
+      type: typeHint ?? null,       // will be refined after getLinkInfo
+      mime: mimeHint ?? null,
+      size: null,
+      filename: null,
     };
 
     this.grabbed.set(normalized, link);
     this.updateNotifier();
     this.spawnFlyingText(el.getBoundingClientRect(), "+");
+
+    // --- Async fetch of metadata ---
+    try {
+      let info = await getLinkInfo(href);
+
+      // If content context couldn't fetch (CORS or blocked), ask background to probe
+      if (!info.ok) {
+        try {
+          // Use browserAPI to send a PROBE_URL message to background
+          const probeRes = await browserAPI.sendMessage({ type: MessageTypes.PROBE_URL, payload: { url: href } }) as any;
+          // background sends LinkInfo object directly via sendResponse in background.ts
+          info = probeRes || info;
+        } catch (bgErr) {
+          // ignore background probe errors
+        }
+      }
+
+      if (info.ok) {
+        // Update your grabbed link with metadata
+        link.size = info.size ?? null;
+        link.filename = info.filename ?? null;
+        link.mime = info.mime ?? link.mime ?? null;
+        link.type = info.type ?? link.type ?? null;
+        link.category = categorizeUrl(link.normalized || link.url, {
+          filename: link.filename ?? undefined,
+          mime: link.mime ?? undefined,
+          typeHint: link.type ?? undefined,
+        });
+
+        // Debug: log probe result
+        try {
+          // eslint-disable-next-line no-console
+          console.debug('[LinkGrabber] probe result for', normalized, { info });
+        } catch {}
+
+        // Format size to human readable preferring numeric sizeNumber
+        try {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const { formatBytes } = await import("./utils/linkCategorizer");
+          const preferred = (info as any).sizeNumber ?? info.size;
+          link.size = formatBytes(preferred) ?? (info.size ?? null);
+        } catch {
+          // ignore formatting errors
+        }
+
+        // Track that this link has completed metadata processing; store on finalize only
+        try {
+          const p = Promise.resolve();
+          this.pending.set(normalized, p);
+          // ensure we remove pending when done
+          p.then(() => this.pending.delete(normalized)).catch(() => this.pending.delete(normalized));
+        } catch {
+          // ignore
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
   }
 
   private findLinkElement(el: Element): Element | null {
@@ -275,16 +438,50 @@ export class LinkGrabber {
     setTimeout(() => el.remove(), 900);
   }
 
-  /** Save session to storage */
   private async finalizeSession(): Promise<void> {
     try {
+      // Wait for any pending metadata probes to finish (but don't wait forever)
+      const pendingPromises = Array.from(this.pending.values());
+      if (pendingPromises.length) {
+        try {
+          await Promise.race([
+            Promise.all(pendingPromises),
+            new Promise((res) => setTimeout(res, 2000)), // 2s max wait
+          ]);
+        } catch {
+          // ignore
+        }
+      }
+
       const links = Array.from(this.grabbed.values());
-      await browserAPI.storeGrabbedLinks(links);
+
+      if (this.settings?.oneKeyMode) {
+        try {
+          const existing = await browserAPI.getGrabbedLinks();
+          let combined = (existing || []).concat(links);
+          if (this.settings.dedupe) {
+            const seen = new Set<string>();
+            combined = combined.filter((l: GrabbedLink) => {
+              const n = l.normalized;
+              if (seen.has(n)) return false;
+              seen.add(n);
+              return true;
+            });
+          }
+          await browserAPI.storeGrabbedLinks(combined);
+        } catch (err) {
+          // fallback to storing just the captured links
+          await browserAPI.storeGrabbedLinks(links);
+        }
+      } else {
+        await browserAPI.storeGrabbedLinks(links);
+      }
+
       this.grabbed.clear();
       this.toggleGrabber(false);
 
       if (this.notifier) {
-        this.notifier.innerHTML =` 
+        this.notifier.innerHTML = `
           <div style="color: #4ade80; font-weight: bold;">✅ Links Saved!</div>
           <div style="font-size: 10px; margin-top: 2px;">${links.length} total links</div>`;
         setTimeout(() => this.removeNotifier(), 3000);

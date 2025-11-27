@@ -6,17 +6,17 @@ const defaultConfig: Record<ToastType, { duration: number; className: string }> 
   success: {
     duration: 2000,
     className:
-      "bg-green-600 text-white font-semibold rounded-lg px-4 py-2 shadow-lg flex items-center justify-center gap-2",
+      "toast-success text-TextIn font-semibold rounded-lg px-4 py-2 shadow-lg flex items-center justify-center gap-2",
   },
   error: {
     duration: 3000,
     className:
-      "bg-red-600 text-white font-semibold rounded-lg px-4 py-2 shadow-lg flex items-center justify-center gap-2",
+      "toast-error text-TextIn font-semibold rounded-lg px-4 py-2 shadow-lg flex items-center justify-center gap-2",
   },
   info: {
     duration: 4000,
     className:
-      "bg-yellow-600 text-white font-semibold rounded-lg px-4 py-2 shadow-lg flex items-center justify-center gap-2",
+      "toast-info text-TextIn font-semibold rounded-lg px-4 py-2 shadow-lg flex items-center justify-center gap-2",
   },
 };
 

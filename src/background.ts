@@ -1,5 +1,6 @@
 import { browserAPI, MessageTypes } from "./utils/browser-api";
-import type { GrabbedLink } from "./utils/helpers";
+import { getLinkInfo } from "./utils/getLinkInfo";
+import type { GrabbedLink } from "./utils/linkCategorizer";
 
 // --- Storage key constant ---
 const STORAGE_KEY = "MagnoGrabr_links";
@@ -35,6 +36,23 @@ const backgroundListener: ExtensionMessageListener = (msg, _sender, sendResponse
           const session = await browserAPI.getGrabbedLinks();
           response = { session };
           break;
+
+        case MessageTypes.PROBE_URL: {
+          const url = msg.payload?.url || (msg.urls && msg.urls[0]);
+          if (!url) {
+            response = { error: "No URL provided for probe" };
+            break;
+          }
+          try {
+            const info = await getLinkInfo(url);
+            // send the LinkInfo object back directly
+            sendResponse(info as any);
+            return;
+          } catch (err) {
+            response = { error: err instanceof Error ? err.message : String(err) };
+            break;
+          }
+        }
 
         case MessageTypes.DOWNLOAD_URLS:
           const urls = msg.payload?.urls || msg.urls;

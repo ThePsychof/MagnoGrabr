@@ -73,7 +73,6 @@ try {
     }
   }
 
-
   // 3.5️⃣ Copy cursor.png
   const cursorSrc = path.join(root, "public", "cursor.png");
   const cursorDest = path.join(dist, "cursor.png");

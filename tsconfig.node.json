@@ -5,14 +5,12 @@
     "lib": ["ESNext"],
     "module": "ESNext",
     "skipLibCheck": true,
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
-
     /* Linting & safety */
     "strict": true,
     "noUnusedLocals": true,
@@ -20,7 +18,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "forceConsistentCasingInFileNames": true // ✅ added
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["vite.config.ts"]
 }

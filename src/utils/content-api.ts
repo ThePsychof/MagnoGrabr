@@ -18,7 +18,8 @@ export interface ExtensionSettings {
   notifyDuration: number;
 }
 
-export type LinkCategory = "images" | "downloads" | "media" | "other";
+import type { LinkCategory } from "./linkCategorizer";
+export type { LinkCategory };
 
 export interface GrabbedLink {
   id: string;

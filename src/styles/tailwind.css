@@ -3,16 +3,129 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 /* stylelint-enable at-rule-no-unknown */
+
 :root {
-    --psychof-red: #ff002b
+  --primary: #ff002b;
+  --primary-600: #e60027;
+  --primary-700: #b30020;
+  --surface: #0f0f10;
+  --surface-2: #1f1f1f;
+  --muted: #9ca3af;
+  --muted-2: #6b7280;
+  --border: #272727;
+  --scroll-thumb: var(--primary);
+  --text: #ffffff;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --error: var(--primary);
 }
+
+/* theme blocks removed — ThemeManager applies variables at runtime
+   Keep token-aware utilities in CSS (they use --MagnoGrabr / --ButtonActive)
+   so runtime variables take precedence. */
+/* Utility classes that use the theme variables */
+.bg-primary { background-color: var(--MagnoGrabr, var(--primary)) !important; }
+.hover\:bg-primary-600:hover { background-color: var(--ButtonActive, var(--primary-600)) !important; }
+.hover\:bg-primary-700:hover { background-color: var(--ButtonActiveHover, var(--primary-700)) !important; }
+.text-muted { color: var(--muted) !important; }
+.text-primary { color: var(--MagnoGrabr, var(--primary)) !important; }
+/* extra token helpers mapped to ThemeManager variables */
+.bg-FilterTagBG { background-color: var(--FilterTagBG) !important; }
+.bg-LinkBG { background-color: var(--LinkBG) !important; }
+.bg-RootBG { background-color: var(--RootBG) !important; }
+.text-TextIn { color: var(--TextIn) !important; }
+.text-TextMd { color: var(--TextMd) !important; }
+.text-TextOut { color: var(--TextOut) !important; }
+.hover\:text-TextOut:hover { color: var(--TextOut) !important; }
+.text-Lable { color: var(--Lable) !important; }
+.text-Source { color: var(--Source) !important; }
+.text-SourceHover { color: var(--SourceHover) !important; }
+.hover\:text-SourceHover:hover { color: var(--SourceHover) !important; }
+.text-MagnoGrabr { color: var(--MagnoGrabr, var(--primary)) !important; }
+.bg-ButtonActive { background-color: var(--ButtonActive, var(--primary)) !important; }
+.hover\:bg-ButtonActiveHover:hover { background-color: var(--ButtonActiveHover, var(--primary-700)) !important; }
+.bg-ButtonNotActive { background-color: var(--ButtonNotActive, var(--surface-2)) !important; }
+.hover\:bg-ButtonNotActiveHover:hover { background-color: var(--ButtonNotActiveHover, var(--surface-2)) !important; }
+.bg-SwitcherBG { background-color: var(--SwitcherBG) !important; }
+.hover\:bg-SwitcherBGHover:hover { background-color: var(--SwitcherBGHover) !important; }
+.placeholder-muted::placeholder { color: var(--muted) !important; }
+.bg-surface { background-color: var(--surface) !important; }
+.bg-surface-2 { background-color: var(--surface-2) !important; }
+.bg-card { background-color: var(--card) !important; }
+.bg-card-2 { background-color: var(--card-2) !important; }
+.border-surface { border-color: var(--border) !important; }
+.scroll-thumb-primary::-webkit-scrollbar { width: 16px; height: 16px; }
+.scroll-thumb-primary::-webkit-scrollbar-track { background: var(--ScroolbarBG, var(--surface)); border-radius: 999px; }
+.scroll-thumb-primary::-webkit-scrollbar-thumb { background: var(--ScroolbarTrack, var(--scroll-thumb)); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+.scroll-thumb-primary::-webkit-scrollbar-thumb:hover { background: var(--ButtonActive, var(--primary-600)); }
+
+/* Firefox and other browsers: use scrollbar-color property (apply only when supported) */
+@supports (scrollbar-color: auto) {
+  .scroll-thumb-primary { scrollbar-color: var(--ScroolbarTrack, var(--scroll-thumb)) var(--ScroolbarBG, var(--surface)); scrollbar-width: auto; }
+}
+
+/* Fallback for browsers that don't support scrollbar-color: rely on WebKit pseudo-elements defined above or use native scrollbars */
+.toast-success { background: var(--success); color: white; }
+.toast-error { background: var(--error); color: white; }
+.toast-info { background: var(--warning); color: white; }
+
+/* Scrollbar utilities for non-webkit browsers (basic fallback) */
+.scrollbar-thumb-primary { --tw-scrollbar-thumb: var(--ScroolbarTrack, var(--scroll-thumb)); }
+/* Additional helpers */
+.bg-warning { background-color: var(--warning) !important; }
+.hover\:bg-warning:hover { background-color: var(--warning) !important; }
+.focus\:ring-primary:focus { box-shadow: 0 0 0 3px rgba(0,0,0,0.15), 0 0 0 4px var(--MagnoGrabr, var(--primary)); }
+
+/* Border + decoration helpers */
+.border-primary { border-color: var(--MagnoGrabr, var(--primary)) !important; }
+.hover\:border-primary:hover { border-color: var(--MagnoGrabr, var(--primary)) !important; }
+.border-ButtonActive { border-color: var(--ButtonActive) !important; }
+.border-ButtonNotActive { border-color: var(--ButtonNotActive) !important; }
+.hover\:border-ButtonActive:hover { border-color: var(--ButtonActive) !important; }
+.decoration-muted { text-decoration-color: var(--muted) !important; }
+.decoration-Source { text-decoration-color: var(--Source) !important; }
+
+/* Modern app root and elevated shadow */
+.app-root {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  background-color: var(--RootBG, var(--surface));
+  color: var(--TextMd, var(--text));
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.7);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+}
+
+.elevated { box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
+
 /* quick custom */
-body { 
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    background: #000;
-    color: #fff;
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--RootBG, var(--surface));
+  color: var(--TextMd, var(--text));
 }
+
 .cursor-MagnoGrabr {
-    cursor: url("PLACEHOLDER") 16 16, crosshair !important;
+  cursor: url("PLACEHOLDER") 16 16, crosshair !important;
+}
+
+@keyframes marquee {
+  /* legacy marquee used elsewhere; kept for compatibility */
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Simple CSS-only marquee used by popup: duplicate content and animate from 0 -> -50% */
+.mg-marquee {
+  display: inline-flex;
+  animation: marquee 12s linear infinite;
+}
+
+.mg-marquee:hover {
+  animation-play-state: paused;
 }
