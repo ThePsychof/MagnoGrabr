@@ -197,9 +197,9 @@ export class LinkGrabber {
     }
     // only include url(...) when provided, otherwise force crosshair for clarity.
     if (cursorUrl) {
-      styleEL.innerHTML = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: url("${cursorUrl}") 16 16, crosshair !important; }`;
+      styleEL.textContent = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: url("${cursorUrl}") 16 16, crosshair !important; }`;
     } else {
-      styleEL.innerHTML = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: crosshair !important; }`;
+      styleEL.textContent = `.cursor-MagnoGrabr, .cursor-MagnoGrabr * { cursor: crosshair !important; }`;
     }
 
     document.body.classList.add('cursor-MagnoGrabr');
@@ -288,9 +288,19 @@ export class LinkGrabber {
     if (!this.notifier) return;
     const count = this.grabbed.size || 0;
     const displayCount = count > 99 ? "99+" : String(count);
-    this.notifier.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:600;font-size:14px;">${displayCount}</div>
-    `;
+    this.notifier.textContent = "";
+    const inner = document.createElement("div");
+    inner.textContent = displayCount;
+    Object.assign(inner.style, {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "100%",
+      height: "100%",
+      fontWeight: "600",
+      fontSize: "14px",
+    });
+    this.notifier.appendChild(inner);
   }
 
   /** Capture logic */
@@ -481,16 +491,30 @@ export class LinkGrabber {
       this.toggleGrabber(false);
 
       if (this.notifier) {
-        this.notifier.innerHTML = `
-          <div style="color: #4ade80; font-weight: bold;">✅ Links Saved!</div>
-          <div style="font-size: 10px; margin-top: 2px;">${links.length} total links</div>`;
+        this.notifier.textContent = "";
+        const title = document.createElement("div");
+        title.textContent = "✅ Links Saved!";
+        title.style.color = "#4ade80";
+        title.style.fontWeight = "bold";
+        const sub = document.createElement("div");
+        sub.textContent = `${links.length} total links`;
+        sub.style.fontSize = "10px";
+        sub.style.marginTop = "2px";
+        this.notifier.append(title, sub);
         setTimeout(() => this.removeNotifier(), 3000);
       }
     } catch (error) {
       if (this.notifier) {
-        this.notifier.innerHTML = `
-          <div style="color: #ef4444; font-weight: bold;">❌ Save Failed</div>
-          <div style="font-size: 10px; margin-top: 2px;">Please reload the page</div>`;
+        this.notifier.textContent = "";
+        const title = document.createElement("div");
+        title.textContent = "❌ Save Failed";
+        title.style.color = "#ef4444";
+        title.style.fontWeight = "bold";
+        const sub = document.createElement("div");
+        sub.textContent = "Please reload the page";
+        sub.style.fontSize = "10px";
+        sub.style.marginTop = "2px";
+        this.notifier.append(title, sub);
         setTimeout(() => this.removeNotifier(), 3000);
       }
     }

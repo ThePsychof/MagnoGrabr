@@ -39,7 +39,9 @@ export function showToast(message: string, type: ToastType = "info") {
   const toastEl = document.createElement("div");
   toastEl.className =
     config.className + " opacity-0 translate-y-[-10px] transition-all duration-300";
-  toastEl.innerHTML = `<span>${message}</span>`;
+  const span = document.createElement("span");
+  span.textContent = message;
+  toastEl.appendChild(span);
 
   const containerEl = ensureContainer();
 

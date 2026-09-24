@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "MagnoGrabr",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Hover to grab links effortlessly.",
   "author": "ThePsychof",
   "action": {
     "default_popup": "popup.html"
   },
   "background": {
+    "scripts": ["background.js"],
     "service_worker": "background.js",
     "type": "module"
   },
@@ -27,9 +28,9 @@
   ],
   "host_permissions": ["<all_urls>"],
   "icons": {
-    "16": "icons/MagnoGrabr.png",
-    "48": "icons/MagnoGrabr.png",
-    "128": "icons/MagnoGrabr.png"
+    "16": "icons/MagnoGrabr-16.png",
+    "48": "icons/MagnoGrabr-48.png",
+    "128": "icons/MagnoGrabr-128.png"
   },
   "web_accessible_resources": [
     {
@@ -50,7 +51,11 @@
   "minimum_chrome_version": "88",
   "browser_specific_settings": {
     "gecko": {
-      "strict_min_version": "109.0"
+      "id": "magnograbr@thepsychof.dev",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }
