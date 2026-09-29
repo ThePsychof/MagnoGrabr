@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MagnoGrabr – Collect links by hovering over them</title>
+<meta name="description" content="MagnoGrabr is a free, open-source browser extension that saves links as you hover over them. Sort, dedupe and export to TXT, CSV or JSON. No tracking.">
+<link rel="icon" href="MagnoGrabr.png">
+<meta name="theme-color" content="#181818">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MagnoGrabr – Collect links by hovering over them">
+<meta property="og:description" content="A free, open-source browser extension that saves links as you hover. Sort, dedupe and export to TXT, CSV or JSON.">
+<meta property="og:image" content="https://thepsychof.github.io/MagnoGrabr/MagnoGrabr.png">
+<meta name="twitter:card" content="summary">
+<style>
+/* tokens from src/utils/theme.ts (red) */
+:root{
+  --brand:#D60003; --action:#F72E2C; --action-hover:#C6211F;
+  --root:#272727; --card:#404040; --deep:#181818; --btn-off:#1F1F1F; --btn-off-hover:#2B2B2B;
+  --text:#E6E6E6; --muted:#999999; --line:#333333;
+  --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--deep);color:var(--text);font:17px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
+a{color:inherit}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--action);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--mono);letter-spacing:-.03em;margin:0}
+p{margin:0}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:8px;background:var(--action);color:#fff;font-weight:700;text-decoration:none;border:1px solid transparent;transition:background .2s}
+.btn:hover{background:var(--action-hover)}
+.btn.ghost{background:transparent;color:var(--text);border-color:#555}
+.btn.ghost:hover{background:var(--btn-off-hover);border-color:#777}
+.btn.sm{padding:8px 16px;font-size:15px}
+.btn .ic{width:1.25em;height:1.25em;flex:none;font-size:1.1em;line-height:1;display:inline-grid;place-items:center}
+/* browser logos + hover name */
+.logos{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+.bl{position:relative;display:inline-grid;place-items:center;width:28px;height:28px;flex:none;font-style:normal;cursor:default}
+.bl img{display:block;width:100%;height:100%;object-fit:contain;transition:transform .15s}
+.bl:hover img{transform:scale(1.15)}
+.bl::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translate(-50%,4px);background:#000;color:#fff;font:12px var(--mono);padding:4px 9px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:30}
+.bl::before{content:"";position:absolute;bottom:calc(100% + 3px);left:50%;transform:translate(-50%,4px);border:6px solid transparent;border-top-color:#000;border-bottom:0;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:30}
+.bl:hover::after,.bl:hover::before{opacity:1;transform:translate(-50%,0)}
+.btn .logos{gap:6px}
+.btn .bl,summary .bl{width:22px;height:22px}
+.trust .logos{margin-top:8px}
+header .bl::after{bottom:auto;top:calc(100% + 9px);transform:translate(-50%,-4px)}
+header .bl::before{bottom:auto;top:calc(100% + 3px);border:6px solid transparent;border-bottom-color:#000;border-top:0;transform:translate(-50%,-4px)}
+header .bl:hover::after,header .bl:hover::before{transform:translate(-50%,0)}
+/* header */
+header{position:sticky;top:0;z-index:10;background:rgba(24,24,24,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 1.2rem var(--mono);letter-spacing:-.02em}
+.brand img{width:30px;height:30px}
+nav{display:flex;align-items:center;gap:28px;font-size:15px}
+nav a:not(.btn){text-decoration:none;color:var(--muted)}
+nav a:not(.btn):hover{color:var(--text)}
+
+/* hero */
+.hero{padding:88px 0 72px;background:radial-gradient(70% 60% at 85% 0%,rgba(247,46,44,.16),transparent 70%)}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+.hero .wrap > *{min-width:0}
+.hero h1{font-size:clamp(2.4rem,5.4vw,4rem);line-height:1.04;margin-bottom:22px}
+.hero .lead{font-size:1.15rem;color:#c9c9c9;max-width:46ch;margin-bottom:32px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.note{margin-top:18px;font-size:14px;color:var(--muted)}
+.shot{margin:0;border:1px solid #3a3a3a;border-radius:14px;background:var(--root);box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden}
+.shot img{display:block;width:100%;height:auto;max-width:100%}
+.shot .ph{display:none;padding:56px 40px;text-align:center;color:var(--muted);font:14px var(--mono)}
+.shot.empty .ph{display:block}
+
+/* trust strip */
+.trust{border-block:1px solid var(--line);background:var(--root)}
+.trust ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr)}
+.trust li{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:30px 20px;border-left:1px solid var(--line)}
+.trust li:first-child{border-left:0}
+.trust svg{flex:none;width:26px;height:26px;stroke:var(--action);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.trust b{display:block;font:600 1rem var(--mono);letter-spacing:-.02em;color:var(--text)}
+.trust span{display:block;margin-top:2px;font-size:14px;line-height:1.45;color:var(--muted)}
+
+section{padding:96px 0}
+.head{max-width:640px;margin-bottom:52px}
+.head h2{font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.1;margin-bottom:14px}
+.head p{color:#bdbdbd;font-size:1.08rem}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:40px;counter-reset:s}
+.steps li{counter-increment:s;border-top:2px solid var(--action);padding-top:22px}
+.steps li::before{content:"Step " counter(s);display:block;font:600 14px var(--mono);color:var(--action);margin-bottom:10px}
+.steps h3{font-size:1.3rem;margin-bottom:8px}
+.steps p{color:#bdbdbd}
+kbd{font:.88em var(--mono);background:var(--btn-off);border:1px solid #4a4a4a;border-radius:5px;padding:1px 7px}
+
+/* feature rows */
+.alt{background:var(--root)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:56px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0;padding-top:0}
+.row h3{font-size:1.75rem;line-height:1.15;margin-bottom:14px}
+.row p{color:#bdbdbd;margin-bottom:14px}
+.row ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.row li{padding-left:26px;position:relative;color:#d6d6d6}
+.row li::before{content:"";position:absolute;left:2px;top:.62em;width:12px;height:2px;background:var(--action)}
+.panel{background:var(--deep);border:1px solid var(--line);border-radius:14px;padding:28px}
+.alt .panel{background:var(--deep)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chips span{background:var(--btn-off);border:1px solid #4a4a4a;border-radius:999px;padding:6px 16px;font-size:16px}
+.panel .cap{margin-top:16px;font-size:14px;color:var(--muted)}
+.fmt{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fmt div{background:var(--btn-off);border:1px solid #4a4a4a;border-radius:10px;padding:18px 10px;text-align:center;font:700 1.3rem var(--mono)}
+.fmt small{display:block;font:13px var(--sans);color:var(--muted);font-weight:400;margin-top:2px}
+.keys{display:grid;gap:12px}
+.keys div{display:flex;justify-content:space-between;align-items:center;background:var(--btn-off);border:1px solid #4a4a4a;border-radius:10px;padding:12px 16px;font-size:15px}
+.keys span{color:var(--muted)}
+
+/* small feature grid */
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:64px}
+.mini div{background:var(--root);padding:26px}
+.mini h4{margin:0 0 6px;font:600 1.02rem var(--mono);letter-spacing:-.02em}
+.mini p{font-size:15px;color:#bdbdbd}
+
+/* comparison */
+.cmp{width:100%;border-collapse:collapse;font-size:16px}
+.cmp th,.cmp td{text-align:left;padding:18px 20px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp thead th{font:700 1rem var(--mono);color:var(--muted);border-bottom:2px solid #444}
+.cmp thead th:last-child{color:var(--action)}
+.cmp td:first-child{font-weight:600;width:22%}
+.cmp td:nth-child(2){color:var(--muted);width:34%}
+.cmp td:last-child{color:var(--text)}
+.scroll{overflow-x:auto}
+
+/* privacy */
+.priv{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+.priv h2{font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.1;margin-bottom:16px}
+.priv p{color:#bdbdbd;margin-bottom:14px}
+.perm{display:grid;gap:12px}
+.perm div{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.perm b{display:block;font:600 1rem var(--mono);margin-bottom:4px}
+.perm p{font-size:15px;margin:0}
+
+/* faq */
+.faq{max-width:780px}
+details{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;padding:22px 40px 22px 0;font:600 1.1rem var(--mono);letter-spacing:-.02em;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:6px;top:18px;font-size:1.6rem;color:var(--action);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 40px 24px 0;color:#bdbdbd}
+
+/* final cta */
+.final{text-align:center;background:radial-gradient(60% 100% at 50% 100%,rgba(247,46,44,.18),transparent 70%),var(--root);border-top:1px solid var(--line)}
+.final h2{font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.08;margin:0 auto 16px;max-width:20ch}
+.final p{color:#bdbdbd;margin:0 auto 32px;max-width:50ch}
+.final .cta{justify-content:center}
+
+footer{padding:36px 0 44px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between}
+footer a{text-decoration:none;margin-right:20px;color:#c9c9c9}
+footer a:hover{color:var(--action)}
+footer a.author{margin-right:0}
+@media(max-width:900px){
+  .hero .wrap,.row,.priv{grid-template-columns:1fr;gap:36px}
+  .steps{grid-template-columns:1fr;gap:28px}
+  .mini{grid-template-columns:1fr 1fr}
+  nav a:not(.btn){display:none}
+  section{padding:72px 0}.hero{padding:56px 0}
+  .trust ul{grid-template-columns:1fr 1fr}
+  .trust li{border-left:0;border-top:1px solid var(--line)}
+  .trust li:nth-child(-n+2){border-top:0}
+}
+@media(max-width:520px){.mini{grid-template-columns:1fr}}
+@media(max-width:520px){.trust ul{grid-template-columns:1fr}.trust li:nth-child(2){border-top:1px solid var(--line)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <a class="brand" href="#"><img src="MagnoGrabr.png" alt="">MagnoGrabr</a>
+  <nav>
+    <a href="#how">How it works</a><a href="#features">Features</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a>
+    <a class="btn sm" data-store="header" href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Add to <span class="logos" data-b="firefox">Firefox</span></a>
+  </nav>
+</div></header>
+
+<main>
+<div class="hero"><div class="wrap">
+  <div>
+    <h1>Collect links by hovering over them.</h1>
+    <p class="lead">MagnoGrabr is a browser extension that saves every link you point at. No opening, no right-clicking, no copy and paste. Sort the results, remove duplicates and export the list.</p>
+    <div class="cta">
+      <a class="btn" data-store="firefox" href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Add to <span class="logos" data-b="firefox">Firefox</span></a>
+      <a class="btn ghost" data-store="chromium" data-dl href="https://github.com/ThePsychof/MagnoGrabr/releases">Get it for <span class="logos" data-b="chrome,edge,brave,opera">Chrome, Edge, Brave or Opera</span></a>
+    </div>
+    <p class="note">Free and open source · Version <span data-version></span></span></p>
+  </div>
+  <figure class="shot" id="shot">
+    <!-- Put a real screenshot of the popup at screenshots/popup.png -->
+    <img src="screenshots/popup.png" alt="The MagnoGrabr popup showing grabbed links sorted into categories"
+         onerror="this.remove();document.getElementById('shot').classList.add('empty')">
+    <div class="ph">Add your popup screenshot at<br>screenshots/popup.png</div>
+  </figure>
+</div></div>
+
+<div class="trust"><div class="wrap">
+  <ul>
+    <li>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+      <div><b>Works in 5 browsers</b><div class="logos" data-b="firefox,chrome,edge,brave,opera">Firefox, Chrome, Edge, Brave and Opera</div></div>
+    </li>
+    <li>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+      <div><b>No tracking</b><span>No ads, no accounts, no analytics</span></div>
+    </li>
+    <li>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
+      <div><b>Open source</b><span>GPL-3.0 licensed, code on GitHub</span></div>
+    </li>
+    <li>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+      <div><b>Local only</b><span>Your links never leave your browser</span></div>
+    </li>
+  </ul>
+</div></div>
+
+<section id="how"><div class="wrap">
+  <div class="head">
+    <h2>From browsing to a clean list in three steps.</h2>
+    <p>You stay on the page you're already reading. MagnoGrabr does the collecting in the background.</p>
+  </div>
+  <ol class="steps">
+    <li><h3>Hold your key</h3><p>Hold your activation key (<kbd>Left Shift</kbd> by default) to start grabbing. You can choose any key, and switch to toggle or one-key mode.</p></li>
+    <li><h3>Hover the links</h3><p>Move your cursor over the links you want. Each one is saved after a short delay that you can adjust.</p></li>
+    <li><h3>Use your list</h3><p>Open the popup to copy, download or export everything, or clear it and start over.</p></li>
+  </ol>
+</div></section>
+
+<section id="features" class="alt"><div class="wrap">
+  <div class="head">
+    <h2>Everything you need to turn a page of links into a usable list.</h2>
+  </div>
+
+  <div class="row">
+    <div>
+      <h3>Capture without clicking</h3>
+      <p>Grab links as you move across a page. Set a grab delay so a passing cursor doesn't collect things you didn't want.</p>
+      <ul>
+        <li>Hold, toggle or one-key modes</li>
+        <li>Your own activation and end keys</li>
+        <li>Extract Page collects every link on the current tab at once</li>
+      </ul>
+    </div>
+    <div class="panel keys" aria-hidden="true">
+      <div>Hold to grab <span>Hold mode</span></div>
+      <div>Press to start, press to stop <span>Toggle mode</span></div>
+      <div>One key starts and finishes <span>One-key mode</span></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel">
+      <div class="chips" aria-hidden="true"><span>🖼️ Media</span><span>📁 Files</span><span>🌐 Links</span><span>📀 Software</span><span>🥷 Suspicious</span></div>
+      <p class="cap">Links are sorted into categories as they are saved.</p>
+    </div>
+    <div>
+      <h3>Organized as you go</h3>
+      <p>Every grab is categorized, deduplicated and labeled with its filename and size, so you can see what you have before you download anything.</p>
+      <ul>
+        <li>Filter by category, name and size</li>
+        <li>Duplicate links are removed automatically</li>
+        <li>Filename and file size shown beside each link</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <h3>Take it anywhere</h3>
+      <p>Export your list in the format the next tool expects, or skip the export and copy or download everything directly from the popup.</p>
+      <ul>
+        <li>Copy all links to the clipboard</li>
+        <li>Download every file in one action</li>
+        <li>Set your default export format</li>
+      </ul>
+    </div>
+    <div class="fmt panel" aria-hidden="true">
+      <div>TXT<small>Plain list</small></div><div>CSV<small>Spreadsheets</small></div><div>JSON<small>Scripts and tools</small></div>
+    </div>
+  </div>
+
+  <div class="mini">
+    <div><h4>Custom cursor</h4><p>Upload your own cursor to see when grabbing is active.</p></div>
+    <div><h4>Instant settings</h4><p>Change keys and delay in the popup. Nothing to reload.</p></div>
+    <div><h4>Lightweight</h4><p>The Firefox package is about 145 KB.</p></div>
+    <div><h4>Cross-browser</h4><p>One codebase for Firefox and Chromium browsers.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="head">
+    <h2>Why not just copy links by hand?</h2>
+    <p>You can. It gets slow once there are more than a handful.</p>
+  </div>
+  <div class="scroll">
+  <table class="cmp">
+    <thead><tr><th></th><th>By hand</th><th>With MagnoGrabr</th></tr></thead>
+    <tbody>
+      <tr><td>Getting a link</td><td>Right-click, choose Copy link address, repeat for each one</td><td>Hover over it</td></tr>
+      <tr><td>Whole pages</td><td>Select and copy links one at a time</td><td>One click on Extract Page</td></tr>
+      <tr><td>Duplicates</td><td>Spot them yourself</td><td>Removed automatically</td></tr>
+      <tr><td>File details</td><td>Open each link to find out</td><td>Filename and size shown beside the link</td></tr>
+      <tr><td>Output</td><td>Paste into a document</td><td>Export to TXT, CSV or JSON</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div></section>
+
+<section id="privacy" class="alt"><div class="wrap priv">
+  <div>
+    <h2>Your links stay on your device.</h2>
+    <p>MagnoGrabr stores everything in your browser's local storage. It has no accounts, no analytics and no ads, and it doesn't send your data to any server.</p>
+    <p>The only network requests it makes go to a link's own address, to read the filename and size shown in your list. The code is open, so you can check for yourself.</p>
+    <a class="btn ghost" href="https://github.com/ThePsychof/MagnoGrabr">Read the source</a>
+  </div>
+  <div class="perm">
+    <div><b>Access to websites</b><p>Needed to detect the links you hover over on the pages you visit.</p></div>
+    <div><b>Clipboard</b><p>Needed for Copy All and Copy Link.</p></div>
+    <div><b>Downloads</b><p>Needed for Download All.</p></div>
+    <div><b>Data collection</b><p>None.</p></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <div class="head"><h2>Questions</h2></div>
+  <div class="faq">
+    <details><summary>Does it work in <span class="logos" data-b="chrome,edge,brave,opera">Chrome, Edge, Brave and Opera</span>?</summary>
+      <p>Yes. Download <code>MagnoGrabr.zip</code> from the latest release, unzip it, open your browser's extensions page, turn on Developer mode and choose Load unpacked. Firefox users can install directly from Firefox Add-ons.</p></details>
+    <details><summary>Why does it need access to all websites?</summary>
+      <p>To see which links your cursor is over, it has to run on the pages you browse. It reads only the link under your cursor while grabbing is active, and stores it locally.</p></details>
+    <details><summary>Will it grab links by accident?</summary>
+      <p>It only collects while your activation key is active, and the grab delay makes it ignore quick passes over a link. You can raise the delay in Settings.</p></details>
+    <details><summary>Where are my links stored?</summary>
+      <p>In your browser's local storage on your device. Clear All in the popup removes them.</p></details>
+    <details><summary>Nothing is grabbing on a page I already had open.</summary>
+      <p>Reload the page once after installing or updating the extension, then try again.</p></details>
+    <details><summary>Is it free?</summary>
+      <p>Yes. MagnoGrabr is free and open source under GPL-3.0.</p></details>
+  </div>
+</div></section>
+
+<section class="final"><div class="wrap">
+  <h2>Stop copying links one by one.</h2>
+  <p>Install MagnoGrabr and collect your next list of links in seconds.</p>
+  <div class="cta">
+    <a class="btn" data-store="firefox" href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Add to <span class="logos" data-b="firefox">Firefox</span></a>
+    <a class="btn ghost" data-store="chromium" data-dl href="https://github.com/ThePsychof/MagnoGrabr/releases">Download for <span class="logos" data-b="chrome,edge,brave,opera">Chromium browsers</span></a>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>MagnoGrabr by <a class="author" href="https://github.com/ThePsychof">Psychof</a> · v<span data-version>0.3.1</span> · GPL-3.0 · Firefox is a trademark of the Mozilla Foundation. MagnoGrabr is not affiliated with Mozilla.</span>
+  <span>
+    <a href="https://github.com/ThePsychof/MagnoGrabr">Source</a>
+    <a href="https://github.com/ThePsychof/MagnoGrabr/issues">Report an issue</a>
+    <a href="https://github.com/ThePsychof/MagnoGrabr/releases">Releases</a>
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Firefox Add-ons</a>
+  </span>
+</div></footer>
+<script>
+/* ---------- browser logos ---------- */
+const BROWSERS = {
+  firefox: ['Firefox', 'Firefox_logo,_2019.svg'],
+  chrome:  ['Chrome',  'Google_Chrome_icon_(February_2022).svg'],
+  edge:    ['Edge',    'Microsoft_Edge_logo_(2019).svg'],
+  brave:   ['Brave',   'Brave_lion_icon.svg'],
+  opera:   ['Opera',   'Opera_2015_icon.svg']
+};
+const LOGO_BASE = 'https://commons.wikimedia.org/wiki/Special:FilePath/';
+
+function renderLogos(el) {
+  el.textContent = '';
+  el.dataset.b.split(',').forEach(key => {
+    const [name, file] = BROWSERS[key];
+    const item = document.createElement('i');
+    item.className = 'bl';
+    item.dataset.tip = name;
+    const img = new Image();
+    img.src = LOGO_BASE + file;
+    img.alt = name;
+    item.append(img);
+    el.append(item);
+  });
+}
+document.querySelectorAll('.logos[data-b]').forEach(renderLogos);
+
+/* ---------- latest release: version + download link ---------- */
+const REPO = 'ThePsychof/MagnoGrabr';
+const RELEASES_PAGE = `https://github.com/${REPO}/releases`;
+let zipUrl = null;
+
+function applyDownloads() {
+  if (zipUrl) document.querySelectorAll('[data-dl]').forEach(a => a.href = zipUrl);
+}
+
+async function latestRelease() {
+  try { // reuse a cached answer for an hour
+    const c = JSON.parse(localStorage.getItem('mg-release'));
+    if (c && Date.now() - c.t < 3600000) return c.d;
+  } catch {}
+  const r = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`,
+                        { headers: { Accept: 'application/vnd.github+json' } });
+  if (!r.ok) throw new Error('no release');
+  const j = await r.json();
+  const zip = (j.assets || []).find(a => a.name === 'MagnoGrabr.zip');
+  const d = { tag: j.tag_name, zip: zip ? zip.browser_download_url : null };
+  try { localStorage.setItem('mg-release', JSON.stringify({ t: Date.now(), d })); } catch {}
+  return d;
+}
+
+latestRelease().then(d => {
+  const v = String(d.tag).replace(/^v/, '');
+  document.querySelectorAll('[data-version]').forEach(e => e.textContent = v);
+  zipUrl = d.zip;
+  applyDownloads();
+}).catch(() => {}); // on any failure the typed-in text stays
+
+/* ---------- browser-aware main button ---------- */
+async function detectChromium() {
+  const ua = navigator.userAgent;
+  if (/Mobi|Android/i.test(ua) || /Firefox\//.test(ua)) return null;
+  if (navigator.brave && await navigator.brave.isBrave().catch(() => false)) return 'brave';
+  if (/OPR\//.test(ua)) return 'opera';
+  if (/Edg\//.test(ua)) return 'edge';
+  if (/Chrome\//.test(ua)) return 'chrome';
+  return null;
+}
+
+detectChromium().then(key => {
+  if (!key) return; // Firefox, Safari and phones keep the default layout
+
+  // show only this visitor's browser logo on the Chromium buttons
+  document.querySelectorAll('[data-store="chromium"] .logos').forEach(el => {
+    el.dataset.b = key;
+    renderLogos(el);
+  });
+
+  // make the Chromium button primary and Firefox secondary
+  document.querySelectorAll('.cta').forEach(cta => {
+    const ff = cta.querySelector('[data-store="firefox"]');
+    const cr = cta.querySelector('[data-store="chromium"]');
+    if (!ff || !cr) return;
+    cr.classList.remove('ghost');
+    ff.classList.add('ghost');
+    cta.prepend(cr);
+  });
+
+  // header button
+  const h = document.querySelector('[data-store="header"]');
+  if (h) {
+    h.href = RELEASES_PAGE;
+    h.setAttribute('data-dl', '');
+    h.innerHTML = 'Get it for <span class="logos" data-b="' + key + '"></span>';
+    renderLogos(h.querySelector('.logos'));
+    applyDownloads();
+  }
+});
+</script>
+</body>
+</html>
