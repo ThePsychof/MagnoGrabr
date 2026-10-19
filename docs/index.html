@@ -57,6 +57,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(24,24,24,.92);backdrop-f
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 1.2rem var(--mono);letter-spacing:-.02em}
 .brand img{width:30px;height:30px}
+.brand small{font:600 .75rem var(--mono);color:var(--action);border:1px solid var(--action);border-radius:999px;padding:1px 9px;letter-spacing:0}
 nav{display:flex;align-items:center;gap:28px;font-size:15px}
 nav a:not(.btn){text-decoration:none;color:var(--muted)}
 nav a:not(.btn):hover{color:var(--text)}
@@ -99,7 +100,7 @@ kbd{font:.88em var(--mono);background:var(--btn-off);border:1px solid #4a4a4a;bo
 /* feature rows */
 .alt{background:var(--root)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:56px 0;border-top:1px solid var(--line)}
-.row:first-of-type{border-top:0;padding-top:0}
+.head + .row{border-top:0;padding-top:0}
 .row h3{font-size:1.75rem;line-height:1.15;margin-bottom:14px}
 .row p{color:#bdbdbd;margin-bottom:14px}
 .row ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
@@ -151,6 +152,22 @@ summary::after{content:"+";position:absolute;right:6px;top:18px;font-size:1.6rem
 details[open] summary::after{transform:rotate(45deg)}
 details p{padding:0 40px 24px 0;color:#bdbdbd}
 
+/* family */
+.family{display:flex;flex-wrap:wrap;gap:24px 48px;align-items:center;justify-content:space-between;background:var(--root);border:1px solid var(--line);border-radius:14px;padding:36px 40px}
+.family h2{font-size:1.6rem;margin-bottom:8px}
+.family h2 a{color:var(--action);text-decoration:none}
+.family h2 a:hover{color:var(--action-hover)}
+.family p{color:#bdbdbd;max-width:56ch}
+@media(max-width:900px){.family{padding:28px 24px}}
+
+/* add-ons stats on its own line */
+#amo{display:block;margin-top:4px}
+#amo[hidden]{display:none}
+
+/* use cases */
+.uses{padding-bottom:0}
+.uses .mini{margin-top:0}
+
 /* final cta */
 .final{text-align:center;background:radial-gradient(60% 100% at 50% 100%,rgba(247,46,44,.18),transparent 70%),var(--root);border-top:1px solid var(--line)}
 .final h2{font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.08;margin:0 auto 16px;max-width:20ch}
@@ -180,9 +197,10 @@ footer a.author{margin-right:0}
 <body>
 
 <header><div class="wrap">
-  <a class="brand" href="#"><img src="MagnoGrabr.png" alt="">MagnoGrabr</a>
+  <a class="brand" href="#"><img src="MagnoGrabr.png" alt="">MagnoGrabr<small>Desktop</small></a>
+
   <nav>
-    <a href="#how">How it works</a><a href="#features">Features</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a>
+    <a href="#how">How it works</a><a href="#features">Features</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a><a href="https://thepsychof.github.io/MagnoGrabr-Android/">Android</a>
     <a class="btn sm" data-store="header" href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Add to <span class="logos" data-b="firefox">Firefox</span></a>
   </nav>
 </div></header>
@@ -196,7 +214,7 @@ footer a.author{margin-right:0}
       <a class="btn" data-store="firefox" href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Add to <span class="logos" data-b="firefox">Firefox</span></a>
       <a class="btn ghost" data-store="chromium" data-dl href="https://github.com/ThePsychof/MagnoGrabr/releases">Get it for <span class="logos" data-b="chrome,edge,brave,opera">Chrome, Edge, Brave or Opera</span></a>
     </div>
-    <p class="note">Free and open source · Version <span data-version></span></span></p>
+    <p class="note">Free and open source · Version <span data-version></span><span id="amo" data-slug="magnograbr" hidden></span></p>
   </div>
   <figure class="shot" id="shot">
     <!-- Put a real screenshot of the popup at screenshots/popup.png -->
@@ -233,7 +251,7 @@ footer a.author{margin-right:0}
     <p>You stay on the page you're already reading. MagnoGrabr does the collecting in the background.</p>
   </div>
   <ol class="steps">
-    <li><h3>Hold your key</h3><p>Hold your activation key (<kbd>Left Shift</kbd> by default) to start grabbing, than end key to send them to MagnoGrabr(<kbd>Left Ctrl</kbd> by default). You can choose any key, and switch to toggle or one-key mode.</p></li>
+    <li><h3>Hold your key</h3><p>Hold your activation key (<kbd>Left Shift</kbd> by default) to start grabbing, then press your end key to send them to MagnoGrabr (<kbd>Left Ctrl</kbd> by default). You can choose any key, and switch to toggle or one-key mode.</p></li>
     <li><h3>Hover the links</h3><p>Move your cursor over the links you want. Each one is saved after a short delay that you can adjust.</p></li>
     <li><h3>Use your list</h3><p>Open the popup to copy, download or export everything, or clear it and start over.</p></li>
   </ol>
@@ -334,6 +352,19 @@ footer a.author{margin-right:0}
   </div>
 </div></section>
 
+<section class="uses"><div class="wrap">
+  <div class="head">
+    <h2>What people grab links for</h2>
+    <p>Anywhere a page has more links than you want to copy by hand.</p>
+  </div>
+  <div class="mini">
+    <div><h4>📥 Feed a download manager</h4><p>Hover over the files you want, then Copy All and paste the list into your downloader, or use Download All.</p></div>
+    <div><h4>🖼️ Gather image galleries</h4><p>Sweep a gallery, then filter by the Media category to keep only the pictures.</p></div>
+    <div><h4>🔬 Archive your research</h4><p>Collect sources while you read and export them to CSV or JSON to keep with your notes.</p></div>
+    <div><h4>📚 Build a reading list</h4><p>Point at the articles you want on a news or forum page and export one clean list.</p></div>
+  </div>
+</div></section>
+
 <section id="faq"><div class="wrap">
   <div class="head"><h2>Questions</h2></div>
   <div class="faq">
@@ -347,8 +378,20 @@ footer a.author{margin-right:0}
       <p>In your browser's local storage on your device. Clear All in the popup removes them.</p></details>
     <details><summary>Nothing is grabbing on a page I already had open.</summary>
       <p>Reload the page once after installing or updating the extension, then try again.</p></details>
+    <details><summary>Is there an Android version?</summary>
+      <p>Yes. <a href="https://addons.mozilla.org/en-US/firefox/addon/magnograbrandroid/">MagnoGrabr for Android</a> runs in Firefox on your phone and lets you tap, draw or smart-grab links.</p></details>
     <details><summary>Is it free?</summary>
       <p>Yes. MagnoGrabr is free and open source under GPL-3.0.</p></details>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="family">
+    <div>
+      <h2>Part of the <a href="https://addons.mozilla.org/en-US/firefox/collections/19588200/MagnoGrabr/">MagnoGrabr family</a></h2>
+      <p>Browsing on your phone? MagnoGrabr also has an Android version for Firefox, with tap, draw and smart-grab tools.</p>
+    </div>
+    <a class="btn ghost" href="https://thepsychof.github.io/MagnoGrabr-Android/">See the Android version ↗</a>
   </div>
 </div></section>
 
@@ -369,6 +412,7 @@ footer a.author{margin-right:0}
     <a href="https://github.com/ThePsychof/MagnoGrabr/issues">Report an issue</a>
     <a href="https://github.com/ThePsychof/MagnoGrabr/releases">Releases</a>
     <a href="https://addons.mozilla.org/en-US/firefox/addon/magnograbr/">Firefox Add-ons</a>
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/magnograbrandroid/">Android</a>
   </span>
 </div></footer>
 <script>
@@ -392,6 +436,7 @@ function renderLogos(el) {
     const img = new Image();
     img.src = LOGO_BASE + file;
     img.alt = name;
+    img.onerror = () => item.replaceWith(document.createTextNode(name + ' '));
     item.append(img);
     el.append(item);
   });
@@ -469,6 +514,29 @@ detectChromium().then(key => {
     applyDownloads();
   }
 });
+/* ---------- live Add-ons stats ---------- */
+(async () => {
+  const el = document.getElementById('amo');
+  if (!el) return;
+  const key = 'mg-amo-' + el.dataset.slug;
+  let d = null;
+  try { const c = JSON.parse(localStorage.getItem(key)); if (c && Date.now() - c.t < 3600000) d = c.d; } catch {}
+  try {
+    if (!d) {
+      const r = await fetch('https://addons.mozilla.org/api/v5/addons/addon/' + el.dataset.slug + '/');
+      if (!r.ok) return;
+      const j = await r.json();
+      d = { u: j.average_daily_users, r: j.ratings && j.ratings.average, n: j.ratings && j.ratings.count };
+      try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), d })); } catch {}
+    }
+    const parts = [];
+    if (d.u) parts.push(d.u.toLocaleString() + ' daily Firefox users');
+    if (d.n && d.r) parts.push('★ ' + d.r.toFixed(1) + ' (' + d.n + ' ratings)');
+    if (!parts.length) return;
+    el.textContent = parts.join(' · ');
+    el.hidden = false;
+  } catch {}
+})();
 </script>
 </body>
 </html>
